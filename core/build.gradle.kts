@@ -2,7 +2,7 @@ plugins {
     id("java")
 }
 
-group = "dev.opuslang.opus"
+group = "dev.opuslang.opus.core"
 version = "0.1"
 
 repositories {
