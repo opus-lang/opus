@@ -45,7 +45,11 @@
     "all": {},
     "misc": {},
     "core": {},
-    "api": {}
+    "api": {},
+    "utils": {},
+    "core-plugins": {},
+    "core-plugins-maestro": {},
+    "core-plugins-magnum": {}
   },
   "footerTypes": [
     {
