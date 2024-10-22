@@ -22,6 +22,7 @@ import java.util.*;
 @AutoService(Processor.class)
 @SupportedAnnotationTypes("dev.opuslang.opus.api.plugin.annotation.Plugin")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
+@SuppressWarnings("unused")
 public class PluginDescriptorGeneratorProcessor extends AbstractProcessor {
 
     private Messager messager;
