@@ -1,3 +1,3 @@
 rootProject.name = "opus"
-include("core")
-include("api")
+include("opus-core")
+include("opus-api")

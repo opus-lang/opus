@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("java-library")
 }
 
 group = "dev.opuslang.opus.api"
