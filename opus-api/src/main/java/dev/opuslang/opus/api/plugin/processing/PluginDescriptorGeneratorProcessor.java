@@ -43,67 +43,65 @@ public class PluginDescriptorGeneratorProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         if(!annotations.isEmpty()) this.messager.printNote("Generating Plugin Descriptor...");
-        for (TypeElement annotation : annotations) {
-            Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith(annotation);
+        Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith(Plugin.class);
 
-            for (Element element : annotatedElements) {
-                Plugin pluginAnnotation = element.getAnnotation(Plugin.class);
-                if(pluginAnnotation == null) continue;
+        for (Element element : annotatedElements) {
+            Plugin pluginAnnotation = element.getAnnotation(Plugin.class);
+            if(pluginAnnotation == null) continue;
 
-                Plugin.InternalDependencyConfiguration[] pluginInternalDependencyConfigs = pluginAnnotation.internalDependencyConfigurations();
-                Map<String, Plugin.InternalDependencyConfiguration> pluginInternalDependencyConfigMap = new HashMap<>(pluginInternalDependencyConfigs.length);
-                for (Plugin.InternalDependencyConfiguration pluginInternalDependencyConfig : pluginInternalDependencyConfigs) {
-                    pluginInternalDependencyConfigMap.put(pluginInternalDependencyConfig.id(), pluginInternalDependencyConfig);
+            Plugin.InternalDependencyConfiguration[] pluginInternalDependencyConfigs = pluginAnnotation.internalDependencyConfigurations();
+            Map<String, Plugin.InternalDependencyConfiguration> pluginInternalDependencyConfigMap = new HashMap<>(pluginInternalDependencyConfigs.length);
+            for (Plugin.InternalDependencyConfiguration pluginInternalDependencyConfig : pluginInternalDependencyConfigs) {
+                pluginInternalDependencyConfigMap.put(pluginInternalDependencyConfig.id(), pluginInternalDependencyConfig);
+            }
+
+            if(element instanceof ModuleElement moduleElement) {
+                String pluginId = moduleElement.getQualifiedName().toString();
+                this.messager.printNote("Plugin Module: " + pluginId);
+
+                List<PluginInternalDependency> internalDependencies = new ArrayList<>();
+
+                for (ModuleElement.Directive directive : moduleElement.getDirectives()) {
+                    if (directive instanceof ModuleElement.RequiresDirective requiresDirective) {
+                        Plugin internalDependencyAnnotation = requiresDirective.getDependency().getAnnotation(Plugin.class);
+                        if (internalDependencyAnnotation == null)
+                            continue; // Required module is not an internal dependency.
+
+                        String internalDependencyId = requiresDirective.getDependency().getQualifiedName().toString();
+                        Plugin.InternalDependencyConfiguration pluginInternalDependencyConfig = pluginInternalDependencyConfigMap.get(internalDependencyId);
+                        this.messager.printNote("Internal Dependency found: " + internalDependencyId);
+//                        if (!requiresDirective.isStatic()){
+//                            this.messager.printError("Internal Dependencies must be static!");
+//                        }
+                        internalDependencies.add(
+                                new PluginInternalDependency(
+                                        internalDependencyId,
+                                        PluginVersionRange.valueOf(pluginInternalDependencyConfig != null ? pluginInternalDependencyConfig.versionRange() : internalDependencyAnnotation.version())
+                                )
+                        );
+                    }
                 }
 
-                if(element instanceof ModuleElement moduleElement) {
-                    String pluginId = moduleElement.getQualifiedName().toString();
-                    this.messager.printNote("Plugin Module: " + pluginId);
+                try {
+                    FileObject fileObject = this.filer.createResource(
+                            StandardLocation.CLASS_OUTPUT,
+                            "",
+                            PluginDescriptor.PATH
+                    );
 
-                    List<PluginInternalDependency> internalDependencies = new ArrayList<>();
-
-                    for (ModuleElement.Directive directive : moduleElement.getDirectives()) {
-                        if (directive instanceof ModuleElement.RequiresDirective requiresDirective) {
-                            Plugin internalDependencyAnnotation = requiresDirective.getDependency().getAnnotation(Plugin.class);
-                            if (internalDependencyAnnotation == null)
-                                continue; // Required module is not an internal dependency.
-
-                            String internalDependencyId = requiresDirective.getDependency().getQualifiedName().toString();
-                            Plugin.InternalDependencyConfiguration pluginInternalDependencyConfig = pluginInternalDependencyConfigMap.get(internalDependencyId);
-                            this.messager.printNote("Internal Dependency found: " + internalDependencyId);
-//                            if (!requiresDirective.isStatic()){
-//                                this.messager.printError("Internal Dependencies must be static!");
-//                            }
-                            internalDependencies.add(
-                                    new PluginInternalDependency(
-                                            internalDependencyId,
-                                            PluginVersionRange.valueOf(pluginInternalDependencyConfig != null ? pluginInternalDependencyConfig.versionRange() : internalDependencyAnnotation.version())
-                                    )
-                            );
-                        }
-                    }
-
-                    try {
-                        FileObject fileObject = this.filer.createResource(
-                                StandardLocation.CLASS_OUTPUT,
-                                "",
-                                PluginDescriptor.PATH
+                    try (Writer writer = fileObject.openWriter()) {
+                        writer.write(
+                                this.gson.toJson(
+                                        new PluginDescriptor(
+                                                pluginId,
+                                                pluginAnnotation,
+                                                internalDependencies.toArray(new PluginInternalDependency[0])
+                                        )
+                                )
                         );
-
-                        try (Writer writer = fileObject.openWriter()) {
-                            writer.write(
-                                    this.gson.toJson(
-                                            new PluginDescriptor(
-                                                    pluginId,
-                                                    pluginAnnotation,
-                                                    internalDependencies.toArray(new PluginInternalDependency[0])
-                                            )
-                                    )
-                            );
-                        }
-                    } catch (IOException e) {
-                        this.messager.printError("Error generating Plugin Descriptor: " + e.getMessage());
                     }
+                } catch (IOException e) {
+                    this.messager.printError("Error generating Plugin Descriptor: " + e.getMessage());
                 }
             }
         }
