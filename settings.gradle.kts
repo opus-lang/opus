@@ -2,3 +2,7 @@ rootProject.name = "opus"
 include("opus-core")
 include("opus-api")
 include("opus-utils")
+
+include("opus-core-plugins")
+include("opus-core-plugins:opus-core-plugins-magnum")
+include("opus-core-plugins:opus-core-plugins-maestro")
