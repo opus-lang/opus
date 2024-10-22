@@ -1,7 +1,6 @@
 package dev.opuslang.opus.api.plugin;
 
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.StringTokenizer;
 
 /**
