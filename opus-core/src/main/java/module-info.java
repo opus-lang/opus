@@ -6,5 +6,7 @@ module dev.opuslang.opus.core {
     requires dev.opuslang.opus.utils;
     requires info.picocli;
 
+    opens dev.opuslang.opus.core.cli to info.picocli;
+
     uses PluginCommandService;
 }
