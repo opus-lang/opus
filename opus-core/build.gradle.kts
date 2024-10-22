@@ -34,6 +34,20 @@ tasks.register("copyOpusPlugins"){
     }
 }
 
+application {
+    applicationName = "opus"
+
+    mainClass = "dev.opuslang.opus.core.Main"
+    mainModule = "dev.opuslang.opus.core"
+
+    applicationDefaultJvmArgs = listOf("-ea") // Enable assertions
+    executableDir = "" // Put scripts in the root instead of "./bin"
+
+    applicationDistribution.from(tasks.named("copyOpusPlugins")){
+        into("plugins")
+    }
+}
+
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -58,6 +72,11 @@ tasks.register("rebuildAndCopyOpusPlugins"){
 
 tasks.named("jar") {
     finalizedBy("rebuildAndCopyOpusPlugins")
+}
+
+tasks.named<JavaExec>("run") {
+    workingDir = layout.buildDirectory.asFile.get().resolve("libs/")
+    standardInput = System.`in` // Enables "System.in"
 }
 
 tasks.test {
