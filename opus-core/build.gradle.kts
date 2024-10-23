@@ -20,7 +20,6 @@ val opusPlugin by configurations.creating {
 tasks.register("copyOpusPlugins"){
     val opusPlugins = opusPlugin.dependencies.filterIsInstance<ProjectDependency>().map { it.dependencyProject }
     inputs.files(opusPlugin.files) // Run only if files changed
-    println(opusPlugin.files)
     outputs.dir(layout.buildDirectory.dir("libs/plugins"))
     for( pluginProject in opusPlugins ){
         val outputDir = layout.buildDirectory.dir("libs/plugins/${pluginProject.name}")
@@ -54,6 +53,7 @@ dependencies {
 
     implementation(project(":opus-api"))
     implementation(project(":opus-utils"))
+    implementation(project(":opus-symphonia")) // Bundle together for convenience
 
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
     implementation("com.google.code.gson:gson:2.11.0")
@@ -76,7 +76,7 @@ tasks.named("jar") {
 
 tasks.named<JavaExec>("run") {
     workingDir = layout.buildDirectory.asFile.get().resolve("libs/")
-    standardInput = System.`in` // Enables "System.in"
+    standardInput = System.`in` // Enable "System.in"
 }
 
 tasks.test {
