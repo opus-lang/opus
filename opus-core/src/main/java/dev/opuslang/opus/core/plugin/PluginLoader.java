@@ -2,7 +2,6 @@ package dev.opuslang.opus.core.plugin;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParseException;
 import dev.opuslang.opus.api.plugin.PluginDescriptor;
 import dev.opuslang.opus.api.plugin.PluginInternalDependency;
 import dev.opuslang.opus.utils.TopologicalSort;
@@ -45,10 +44,12 @@ public enum PluginLoader {
         TopologicalSort<String> pluginSorter = new TopologicalSort<>(pluginReferences.size());
 
         for(ModuleReference pluginReference : pluginReferences){
-            if(pluginReference.location().isEmpty()) throw new IllegalStateException("Found a plugin without location."); // should never happen.
-            this.readPluginDescriptor(pluginReference).ifPresent(pluginDescriptor -> {
+            assert pluginReference.location().isPresent(); // must never happen
+            this.readPluginDescriptor(pluginReference).ifPresentOrElse(pluginDescriptor -> {
                 indexedPluginById.put(pluginDescriptor.id(), new IndexedPlugin(pluginReference, pluginDescriptor, Path.of(pluginReference.location().get()).getParent()));
                 pluginSorter.addVertex(pluginDescriptor.id(), Arrays.stream(pluginDescriptor.internalDependencies()).map(PluginInternalDependency::id).collect(Collectors.toSet()));
+            }, () -> {
+                throw new IllegalStateException("Unable to load plugin: " + pluginReference);
             });
         }
 
@@ -110,7 +111,7 @@ public enum PluginLoader {
             try(InputStream pluginDescriptorInputStream = pluginResourceReader.open(PluginDescriptor.PATH).orElse(InputStream.nullInputStream())){
                 try{
                     return Optional.of(this.gson.fromJson(new String(pluginDescriptorInputStream.readAllBytes(), StandardCharsets.UTF_8), PluginDescriptor.class));
-                }catch (JsonParseException e){
+                }catch (Exception e){
                     return Optional.empty();
                 }
             }
