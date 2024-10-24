@@ -11,4 +11,6 @@ module dev.opuslang.opus.api {
     exports dev.opuslang.opus.api.plugin.spi;
     exports dev.opuslang.opus.api.plugin to dev.opuslang.opus.core;
     opens dev.opuslang.opus.api.plugin to com.google.gson;
+
+    exports dev.opuslang.opus.api.service;
 }

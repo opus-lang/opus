@@ -1,7 +1,6 @@
-import dev.opuslang.opus.api.plugin.service.PluginCommandService;
 import dev.opuslang.opus.api.plugin.spi.PluginLoader;
+import dev.opuslang.opus.api.service.SubcommandService;
 import dev.opuslang.opus.core.plugin.OpusPluginLoader;
-
 
 module dev.opuslang.opus.core {
     requires com.google.gson;
@@ -13,5 +12,5 @@ module dev.opuslang.opus.core {
 
     provides PluginLoader with OpusPluginLoader;
 
-    uses PluginCommandService;
+    uses SubcommandService;
 }

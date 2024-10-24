@@ -1,5 +1,5 @@
 import dev.opuslang.opus.api.plugin.annotation.Plugin;
-import dev.opuslang.opus.api.plugin.service.PluginCommandService;
+import dev.opuslang.opus.api.service.SubcommandService;
 import dev.opuslang.opus.core.plugins.maestro.MaestroCommand;
 
 @Plugin(
@@ -13,5 +13,5 @@ module dev.opuslang.opus.core.plugins.maestro {
     requires info.picocli;
 
     opens dev.opuslang.opus.core.plugins.maestro to info.picocli;
-    provides PluginCommandService with MaestroCommand;
+    provides SubcommandService with MaestroCommand;
 }
