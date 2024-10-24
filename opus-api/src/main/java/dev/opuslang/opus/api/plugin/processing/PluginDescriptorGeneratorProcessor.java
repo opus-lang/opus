@@ -70,9 +70,9 @@ public class PluginDescriptorGeneratorProcessor extends AbstractProcessor {
                         String internalDependencyId = requiresDirective.getDependency().getQualifiedName().toString();
                         Plugin.InternalDependencyConfiguration pluginInternalDependencyConfig = pluginInternalDependencyConfigMap.get(internalDependencyId);
                         this.messager.printNote("Internal Dependency found: " + internalDependencyId);
-//                        if (!requiresDirective.isStatic()){
-//                            this.messager.printError("Internal Dependencies must be static!");
-//                        }
+                        if (!requiresDirective.isStatic()){
+                            this.messager.printError("Internal Dependencies must be static!", moduleElement);
+                        }
                         internalDependencies.add(
                                 new PluginInternalDependency(
                                         internalDependencyId,
