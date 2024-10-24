@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.opuslang.opus.api.plugin.PluginDescriptor;
 import dev.opuslang.opus.api.plugin.PluginInternalDependency;
+import dev.opuslang.opus.api.plugin.spi.PluginLoader;
+import dev.opuslang.opus.api.plugin.spi.PluginServiceLoaderHandler;
 import dev.opuslang.opus.utils.TopologicalSort;
 
 import java.io.File;
@@ -15,19 +17,27 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public enum PluginLoader {
+public enum OpusPluginLoader implements PluginLoader {
     INSTANCE();
 
-    private final Gson gson;
+    public static PluginLoader provider() { // Special method in JPMS. Takes precedence over non-argument constructor during loading.
+        return OpusPluginLoader.INSTANCE;
+    }
 
-    PluginLoader(){
+    private final Gson gson;
+    private Collection<ModuleLayer> plugins;
+
+    OpusPluginLoader(){
         this.gson = new GsonBuilder()
                 .disableHtmlEscaping()
                 .setPrettyPrinting()
                 .create();
     }
 
-    public Collection<ModuleLayer> loadPlugins(String pluginFolderPath){
+    public void loadPlugins(String pluginFolderPath){
+        if(this.plugins != null){
+            throw new IllegalStateException("Plugins can only be loaded once!");
+        }
         Path[] pluginDirectories = Arrays.stream(
                 Optional.ofNullable(new File(pluginFolderPath).listFiles(File::isDirectory)).orElse(new File[0])
         ).map(File::toPath).toArray(Path[]::new);
@@ -85,25 +95,16 @@ public enum PluginLoader {
             ModuleLayer pluginLayer = ModuleLayer.defineModulesWithOneLoader(pluginConfiguration, layers, ClassLoader.getSystemClassLoader()).layer();
             pluginLayerById.put(pluginId, pluginLayer);
         }
-        return pluginLayerById.values();
+
+        this.plugins = pluginLayerById.values();
     }
 
-    public <T> List<T> loadServices(Collection<ModuleLayer> layers, Class<T> clazz){
-        List<T> result = new ArrayList<>(layers.size());
-        for(ModuleLayer layer : layers){
-            result.addAll(this.loadModulesFromLayer(layer, clazz));
+    public <T> List<T> loadServices(PluginServiceLoaderHandler<T> serviceLoaderHandler, Class<T> serviceClass){
+        List<T> result = new ArrayList<>(this.plugins.size());
+        for(ModuleLayer layer : this.plugins){
+            result.addAll(loadModulesFromLayer(serviceLoaderHandler, layer, serviceClass));
         }
         return result;
-    }
-
-    private <T> List<T> loadModulesFromLayer(ModuleLayer layer, Class<T> clazz){
-        List<T> services = new ArrayList<>();
-        Iterable<T> a = ServiceLoader.load(layer, clazz);
-        for(T service : a){
-            if(!service.getClass().getModule().getLayer().equals(layer)) break;
-            services.add(service);
-        }
-        return services;
     }
 
     private Optional<PluginDescriptor> readPluginDescriptor(ModuleReference pluginReference){
@@ -118,6 +119,16 @@ public enum PluginLoader {
         }catch (IOException e){
             return Optional.empty();
         }
+    }
+
+    private static <T> List<T> loadModulesFromLayer(PluginServiceLoaderHandler<T> serviceLoaderQuery, ModuleLayer layer, Class<T> clazz){
+        List<T> services = new ArrayList<>();
+        Iterable<T> a = serviceLoaderQuery.get(layer, clazz);
+        for(T service : a){
+            if(!service.getClass().getModule().getLayer().equals(layer)) break;
+            services.add(service);
+        }
+        return services;
     }
 
 }

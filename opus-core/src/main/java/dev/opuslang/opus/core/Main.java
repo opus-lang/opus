@@ -9,9 +9,9 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        Collection<ModuleLayer> plugins = PluginLoader.INSTANCE.loadPlugins("plugins/");
+        PluginLoader.getInstance().loadPlugins("plugins/");
         CommandLine cli = new CommandLine(new OpusCommand());
-        for(PluginCommandService<?> commandService : PluginLoader.INSTANCE.loadServices(plugins, PluginCommandService.class)){
+        for(PluginCommandService<?> commandService : PluginLoader.getInstance().loadServices(ServiceLoader::load, PluginCommandService.class)){
             cli.addSubcommand(commandService);
         }
 
