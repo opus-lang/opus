@@ -14,6 +14,7 @@
             <option value="$PROJECT_DIR$/opus-core-plugins" />
             <option value="$PROJECT_DIR$/opus-core-plugins/opus-core-plugins-maestro" />
             <option value="$PROJECT_DIR$/opus-core-plugins/opus-core-plugins-magnum" />
+            <option value="$PROJECT_DIR$/opus-core-plugins/opus-core-plugins-magnum-passes-lexer" />
             <option value="$PROJECT_DIR$/opus-symphonia" />
             <option value="$PROJECT_DIR$/opus-utils" />
           </set>

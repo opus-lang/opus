@@ -63,6 +63,7 @@ dependencies {
 
     opusPlugin(project(":opus-core-plugins:opus-core-plugins-magnum"))
     opusPlugin(project(":opus-core-plugins:opus-core-plugins-maestro"))
+    opusPlugin(project(":opus-core-plugins:opus-core-plugins-magnum-passes-lexer"))
 }
 
 tasks.register("rebuildAndCopyOpusPlugins"){
