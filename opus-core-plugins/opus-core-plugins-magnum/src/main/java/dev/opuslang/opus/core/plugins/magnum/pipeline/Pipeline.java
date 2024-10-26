@@ -6,7 +6,7 @@ import dev.opuslang.opus.utils.TopologicalSort;
 
 import java.util.*;
 
-public record Pipeline(List<String> sorted, Map<String, PassData> passes) {
+public record Pipeline(String[] sorted, Map<String, PassData> passes) {
 
     public static class Builder{
 
@@ -27,7 +27,7 @@ public record Pipeline(List<String> sorted, Map<String, PassData> passes) {
             for(Map.Entry<String, PassData> entry :  this.passes.entrySet()){
                 sorter.addVertex(entry.getKey(), Set.of(entry.getValue().configuration().dependencies()));
             }
-            return new Pipeline(Collections.unmodifiableList(sorter.sort()), Collections.unmodifiableMap(this.passes));
+            return new Pipeline(sorter.sort().toArray(String[]::new), Collections.unmodifiableMap(this.passes));
         }
 
     }

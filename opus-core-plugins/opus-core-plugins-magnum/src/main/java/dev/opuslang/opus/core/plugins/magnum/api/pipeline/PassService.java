@@ -1,7 +1,7 @@
 package dev.opuslang.opus.core.plugins.magnum.api.pipeline;
 
-public interface PassService<T> {
+public sealed interface PassService<T> permits IndependentPassService, SynchronizedPassService {
 
-    T execute(PassContext context, String[] args);
+    boolean isIndependent();
 
 }
