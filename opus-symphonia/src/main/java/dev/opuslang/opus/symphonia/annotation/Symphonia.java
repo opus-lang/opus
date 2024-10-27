@@ -26,6 +26,7 @@ public final class Symphonia {
     @Retention(RetentionPolicy.SOURCE)
     @Target(ElementType.TYPE)
     public @interface Component {
+        String name() default "";
     }
 
     @Retention(RetentionPolicy.SOURCE)

@@ -100,7 +100,7 @@ public class SymphoniaGeneratorProcessor extends AbstractProcessor {
 
         for (TypeElement componentElement : componentElements) {
             TypeName componentTypeName = TypeName.get(componentElement.asType());
-            String componentFieldName = componentElement.getSimpleName().toString().toLowerCase();
+            String componentFieldName = getComponentFieldName(componentElement);
             setterClassBuilder.addField(componentTypeName, componentFieldName, Modifier.PROTECTED, Modifier.FINAL);
             setterConstructorBuilder.addStatement("this.$L = new $T()", componentFieldName, componentElement.asType());
 
@@ -125,7 +125,7 @@ public class SymphoniaGeneratorProcessor extends AbstractProcessor {
                         // If no matching Provider, attempt to search among other components.
                         for(TypeElement otherComponentElement : componentElements){
                             if (this.typeUtils.isSameType(otherComponentElement.asType(), fieldType)) {
-                                String otherComponentFieldName = otherComponentElement.getSimpleName().toString().toLowerCase();
+                                String otherComponentFieldName = getComponentFieldName(otherComponentElement);
                                 injectionBlock.addStatement("this.$L.$L = this.$L",
                                         componentFieldName, fieldName, otherComponentFieldName);
                                 continue injectorLoop;
@@ -192,6 +192,23 @@ public class SymphoniaGeneratorProcessor extends AbstractProcessor {
         }
         assert false; // must never happen
         return new MirroredTypeException(null);
+    }
+
+    private static String getComponentFieldName(TypeElement componentElement){
+        Symphonia.Component componentAnnotation = componentElement.getAnnotation(Symphonia.Component.class);
+        if(componentAnnotation == null || componentAnnotation.name().isBlank()){
+            return toCamelCase(componentElement.getSimpleName().toString());
+        }else{
+            return componentAnnotation.name();
+        }
+    }
+
+    private static String toCamelCase(String str){
+        if(str == null) return null;
+        if(str.isBlank()) return str;
+        String start = str.substring(0, 1).toLowerCase();
+        if(str.length() == 1) return start;
+        return start + str.substring(1);
     }
 
 }
