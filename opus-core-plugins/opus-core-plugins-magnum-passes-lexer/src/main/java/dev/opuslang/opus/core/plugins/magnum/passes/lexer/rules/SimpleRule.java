@@ -20,7 +20,7 @@ public class SimpleRule {
     }
 
     public Token simple(int length, Token.Type type, Cursor position){
-        if(length <= 0) throw new IllegalArgumentException("Token length cannot be negative.");
+        if(length <= 0) throw new IllegalArgumentException("Token length must be positive.");
         this.scanner.next(length-1);
         return new Token(type, "", position);
     }
