@@ -29,8 +29,10 @@ public record Token(Type type, String value, Cursor position) {
 
 
         // Keywords
-        KEYWORD_NAMESPACE,
         KEYWORD_IMPORT,
+        KEYWORD_YIELD,
+        KEYWORD_BACKSLASH, // lambda
+        KEYWORD_NEVER,
         KEYWORD_UNDERSCORE, // used for default values
         KEYWORD_AS, // explicit casting // TODO: maybe rename to operator??
         KEYWORD_FN, // fn
@@ -60,6 +62,7 @@ public record Token(Type type, String value, Cursor position) {
         KEYWORD_UNSEALED,
         KEYWORD_STRUCT,
         KEYWORD_UNSAFE,
+        KEYWORD_INFER,
 
         OPERATOR_BITWISE_AND,
         OPERATOR_BITWISE_OR,
@@ -67,6 +70,12 @@ public record Token(Type type, String value, Cursor position) {
         OPERATOR_BITWISE_NOT,
 
         OPERATOR_WALRUS,
+        OPERATOR_PLUSEQUALS,
+        OPERATOR_MINUSEQUALS,
+        OPERATOR_MULTIPLYEQUALS,
+        OPERATOR_DIVIDEEQUALS,
+        OPERATOR_INTEGERDIVIDEEQUALS,
+        OPERATOR_POWEREQUALS,
 
         OPERATOR_PLUS,
         OPERATOR_MINUS,
@@ -86,6 +95,7 @@ public record Token(Type type, String value, Cursor position) {
         CHARACTER,
         INTEGER,
         FLOATING,
+        VOID,
 
         COMMENT,
 

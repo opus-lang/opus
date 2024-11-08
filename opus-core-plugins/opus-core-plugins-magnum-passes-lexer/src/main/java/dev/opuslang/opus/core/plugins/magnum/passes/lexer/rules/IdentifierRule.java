@@ -6,13 +6,13 @@ import dev.opuslang.opus.core.plugins.magnum.passes.lexer.api.Token;
 import dev.opuslang.opus.core.plugins.magnum.passes.lexer.utils.Characters;
 import dev.opuslang.opus.symphonia.annotation.Symphonia;
 
-@Symphonia.Component(name = "identifier")
+@Symphonia.DI.Component(name = "identifier")
 public class IdentifierRule {
 
-    @Symphonia.Inject
+    @Symphonia.DI.Inject
     SourceScanner scanner;
 
-    @Symphonia.Inject
+    @Symphonia.DI.Inject
     KeywordRule keyword;
 
     public Token lex(){

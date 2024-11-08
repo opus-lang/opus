@@ -6,7 +6,7 @@ import dev.opuslang.opus.core.plugins.magnum.passes.lexer.api.Token;
 import dev.opuslang.opus.core.plugins.magnum.passes.lexer.utils.Characters;
 import dev.opuslang.opus.symphonia.annotation.Symphonia;
 
-@Symphonia.Component(name = "number")
+@Symphonia.DI.Component(name = "number")
 public class NumberRule {
 
     private enum Mode{
@@ -18,7 +18,7 @@ public class NumberRule {
         }
     }
 
-    @Symphonia.Inject
+    @Symphonia.DI.Inject
     SourceScanner scanner;
 
     public Token lex(){

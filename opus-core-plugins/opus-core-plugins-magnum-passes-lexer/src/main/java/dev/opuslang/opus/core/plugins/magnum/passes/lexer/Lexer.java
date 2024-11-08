@@ -19,7 +19,9 @@ public class Lexer extends AbstractLexer {
             case ')' -> this.simple.simple(Token.Type.RPARENTHESIS);
             case '[' -> this.simple.simple(Token.Type.LSQUARE);
             case ']' -> this.simple.simple(Token.Type.RSQUARE);
+            case '\\' -> this.simple.simple(Token.Type.KEYWORD_BACKSLASH);
 
+            case '#' -> this.simple.simple(Token.Type.VOID);
             case '@' -> this.simple.simple(Token.Type.AT);
             case ';' -> this.simple.simple(Token.Type.SEMICOLON);
 

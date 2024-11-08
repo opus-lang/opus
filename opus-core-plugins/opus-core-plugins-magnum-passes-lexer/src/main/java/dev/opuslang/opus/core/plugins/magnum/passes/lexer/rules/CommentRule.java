@@ -6,10 +6,10 @@ import dev.opuslang.opus.core.plugins.magnum.passes.lexer.api.Token;
 import dev.opuslang.opus.core.plugins.magnum.passes.lexer.utils.Characters;
 import dev.opuslang.opus.symphonia.annotation.Symphonia;
 
-@Symphonia.Component(name = "comment")
+@Symphonia.DI.Component(name = "comment")
 public class CommentRule {
 
-    @Symphonia.Inject
+    @Symphonia.DI.Inject
     SourceScanner scanner;
 
     public Token lexSingleline(){

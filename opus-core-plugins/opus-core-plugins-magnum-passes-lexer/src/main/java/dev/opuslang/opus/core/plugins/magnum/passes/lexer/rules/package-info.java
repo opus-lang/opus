@@ -1,7 +1,7 @@
-@Symphonia.Package(
+@Symphonia.DI.Package(
         outputClass = "AbstractLexer",
         additionalProviders = {
-                @Symphonia.Provider(type = SourceScanner.class, name = "scanner", required = true)
+                @Symphonia.DI.Provider(type = SourceScanner.class, name = "scanner", required = true)
         }
 )
 package dev.opuslang.opus.core.plugins.magnum.passes.lexer.rules;

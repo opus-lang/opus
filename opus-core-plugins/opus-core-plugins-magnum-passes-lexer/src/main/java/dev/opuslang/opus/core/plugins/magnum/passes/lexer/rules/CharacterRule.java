@@ -5,10 +5,10 @@ import dev.opuslang.opus.core.plugins.magnum.passes.lexer.api.Cursor;
 import dev.opuslang.opus.core.plugins.magnum.passes.lexer.api.Token;
 import dev.opuslang.opus.symphonia.annotation.Symphonia;
 
-@Symphonia.Component(name = "character")
+@Symphonia.DI.Component(name = "character")
 public class CharacterRule {
 
-    @Symphonia.Inject
+    @Symphonia.DI.Inject
     SourceScanner scanner;
 
     public Token lex() {

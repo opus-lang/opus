@@ -8,10 +8,10 @@ import dev.opuslang.opus.symphonia.annotation.Symphonia;
 
 import java.lang.Character;
 
-@Symphonia.Component(name = "string")
+@Symphonia.DI.Component(name = "string")
 public class StringRule {
 
-    @Symphonia.Inject
+    @Symphonia.DI.Inject
     SourceScanner scanner;
 
     public Token lexNormal(){

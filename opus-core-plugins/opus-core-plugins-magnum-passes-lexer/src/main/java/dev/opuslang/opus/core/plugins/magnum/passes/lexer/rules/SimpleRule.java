@@ -5,10 +5,10 @@ import dev.opuslang.opus.core.plugins.magnum.passes.lexer.api.Cursor;
 import dev.opuslang.opus.core.plugins.magnum.passes.lexer.api.Token;
 import dev.opuslang.opus.symphonia.annotation.Symphonia;
 
-@Symphonia.Component(name = "simple")
+@Symphonia.DI.Component(name = "simple")
 public class SimpleRule {
 
-    @Symphonia.Inject
+    @Symphonia.DI.Inject
     SourceScanner scanner;
 
     public Token simple(Token.Type type){
