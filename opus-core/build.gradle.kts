@@ -33,6 +33,14 @@ tasks.register("copyOpusPlugins"){
     }
 }
 
+tasks.register<Copy>("copyOpusExamples"){
+    val examplesDir = rootProject.layout.projectDirectory.dir("examples");
+    inputs.dir(examplesDir)
+    outputs.dir(layout.buildDirectory.dir("libs/examples"))
+    from(examplesDir)
+    into(layout.buildDirectory.dir("libs/examples/"))
+}
+
 application {
     applicationName = "opus"
 
@@ -44,6 +52,9 @@ application {
 
     applicationDistribution.from(tasks.named("copyOpusPlugins")){
         into("plugins")
+    }
+    applicationDistribution.from(tasks.named("copyOpusExamples")){
+        into("examples")
     }
 }
 
@@ -75,6 +86,7 @@ tasks.register("rebuildAndCopyOpusPlugins"){
 
 tasks.named("jar") {
     finalizedBy("rebuildAndCopyOpusPlugins")
+    finalizedBy("copyOpusExamples")
 }
 
 tasks.named<JavaExec>("run") {
