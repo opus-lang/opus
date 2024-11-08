@@ -120,9 +120,12 @@ public class PipelineExecutor {
                             fullContextByFile.forEach((key, value) -> isolatedContextByFile.computeIfAbsent(key, k -> new PassContext()).put(dependency, value.rawGet(dependency)));
                         }
 
-                        Object result = ((SynchronizedPassService<?>) pass.passService()).execute(files, isolatedContextByFile, pass.configuration().id().equals(this.target) ? args : EMPTY_ARGUMENTS);
-                        for(PassContext fullContext : fullContextByFile.values()){
-                            fullContext.put(pass.configuration().id(), result); // Pass the result to all contexts.
+                        Map<File, ?> result = ((SynchronizedPassService<?>) pass.passService()).execute(files, isolatedContextByFile, pass.configuration().id().equals(this.target) ? args : EMPTY_ARGUMENTS);
+                        if(result.size() != fullContextByFile.size()){
+                            throw new IllegalStateException("Synchronized Passes must return a result for all the files.");
+                        }
+                        for(Map.Entry<File, ?> fileResult : result.entrySet()){
+                            fullContextByFile.get(fileResult.getKey()).put(pass.configuration().id(), fileResult.getValue());
                         }
                     }
                 }

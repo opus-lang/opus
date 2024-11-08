@@ -6,7 +6,7 @@ import java.util.Map;
 
 public non-sealed abstract class SynchronizedPassService<T> implements PassService<T>{
 
-    public abstract T execute(List<File> files, Map<File, PassContext> contexts, String[] args);
+    public abstract Map<File, T> execute(List<File> files, Map<File, PassContext> contexts, String[] args);
 
     @Override
     public final boolean isIndependent() {
