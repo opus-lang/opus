@@ -17,12 +17,12 @@ import java.util.function.Supplier;
 
 @AutoService(Processor.class)
 @SupportedAnnotationTypes({
-        "dev.opuslang.opus.symphonia.annotation.Symphonia.Package",
-        "dev.opuslang.opus.symphonia.annotation.Symphonia.Component"
+        "dev.opuslang.opus.symphonia.annotation.Symphonia.DI.Package",
+        "dev.opuslang.opus.symphonia.annotation.Symphonia.DI.Component"
 })
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 @SuppressWarnings("unused")
-public class SymphoniaGeneratorProcessor extends AbstractProcessor {
+public class SymphoniaDIGeneratorProcessor extends AbstractProcessor {
 
     private Messager messager;
     private Filer filer;
@@ -40,16 +40,16 @@ public class SymphoniaGeneratorProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        if(!annotations.isEmpty()) this.messager.printNote("Generating Symphonias...");
+        if(!annotations.isEmpty()) this.messager.printNote("Generating Symphonia.DIs...");
 
         Map<PackageElement, Set<TypeElement>> classesByPackage = new HashMap<>();
-        for (Element element : roundEnv.getElementsAnnotatedWith(Symphonia.Package.class)) {
+        for (Element element : roundEnv.getElementsAnnotatedWith(Symphonia.DI.Package.class)) {
             if(element instanceof PackageElement packageElement){
                 classesByPackage.putIfAbsent(packageElement, new HashSet<>());
             }
         }
 
-        for (Element element : roundEnv.getElementsAnnotatedWith(Symphonia.Component.class)) {
+        for (Element element : roundEnv.getElementsAnnotatedWith(Symphonia.DI.Component.class)) {
             if(element instanceof TypeElement typeElement){
                 if(!hasNoArgConstructor(typeElement)){
                     this.messager.printError("Symphonia.Component must have a no-arg constructor.", typeElement);
@@ -64,21 +64,21 @@ public class SymphoniaGeneratorProcessor extends AbstractProcessor {
 
         for(Map.Entry<PackageElement, Set<TypeElement>> entry : classesByPackage.entrySet()){
             for(TypeElement componentElement : entry.getValue()) {
-                checkRequiredBindings(entry.getKey().getAnnotation(Symphonia.Package.class), componentElement).ifPresent(absentInjection -> {
+                checkRequiredBindings(entry.getKey().getAnnotation(Symphonia.DI.Package.class), componentElement).ifPresent(absentInjection -> {
                     this.messager.printError(String.format("Symphonia.Component does not inject a required field '%s'.", absentInjection), componentElement);
                 });
             }
             try {
                 this.generateClass(entry.getKey(), entry.getValue());
             } catch (IOException e) {
-                this.messager.printError("Failed to generate Symphonia class: " + e.getMessage());
+                this.messager.printError("Failed to generate Symphonia.DI class: " + e.getMessage());
             }
         }
         return true;
     }
 
     private void generateClass(PackageElement packageElement, Set<TypeElement> componentElements) throws IOException {
-        Symphonia.Package symphoniaPackageAnnotation = packageElement.getAnnotation(Symphonia.Package.class);
+        Symphonia.DI.Package symphoniaPackageAnnotation = packageElement.getAnnotation(Symphonia.DI.Package.class);
 
         String setterClassName = symphoniaPackageAnnotation.outputClass();
         String annotatedPackageName = packageElement.getQualifiedName().toString();
@@ -89,7 +89,7 @@ public class SymphoniaGeneratorProcessor extends AbstractProcessor {
         MethodSpec.Builder setterConstructorBuilder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PROTECTED);
 
-        for (Symphonia.Provider providerAnnotation : symphoniaPackageAnnotation.additionalProviders()) {
+        for (Symphonia.DI.Provider providerAnnotation : symphoniaPackageAnnotation.additionalProviders()) {
             TypeMirror type = getClassSafely(providerAnnotation::type).getTypeMirror();
             setterClassBuilder.addField(TypeName.get(type), providerAnnotation.name(), Modifier.PROTECTED, Modifier.FINAL);
             setterConstructorBuilder.addStatement("this.$L = $L", providerAnnotation.name(), providerAnnotation.name());
@@ -145,15 +145,15 @@ public class SymphoniaGeneratorProcessor extends AbstractProcessor {
         setterFile.writeTo(filer);
     }
 
-    private Optional<String> findMatchingField(Symphonia.Package symphoniaPackageAnnotation, TypeMirror fieldType) {
-        for (Symphonia.Provider providerAnnotation : symphoniaPackageAnnotation.additionalProviders()) {
+    private Optional<String> findMatchingField(Symphonia.DI.Package symphoniaPackageAnnotation, TypeMirror fieldType) {
+        for (Symphonia.DI.Provider providerAnnotation : symphoniaPackageAnnotation.additionalProviders()) {
             return this.typeUtils.isSameType(fieldType, getClassSafely(providerAnnotation::type).getTypeMirror()) ? Optional.of(providerAnnotation.name()) : Optional.empty();
         }
         return Optional.empty();
     }
 
-    private Optional<TypeMirror> checkRequiredBindings(Symphonia.Package symphoniaPackageAnnotation, TypeElement componentElement) {
-        providerLoop: for(Symphonia.Provider providerAnnotation : symphoniaPackageAnnotation.additionalProviders()){
+    private Optional<TypeMirror> checkRequiredBindings(Symphonia.DI.Package symphoniaPackageAnnotation, TypeElement componentElement) {
+        providerLoop: for(Symphonia.DI.Provider providerAnnotation : symphoniaPackageAnnotation.additionalProviders()){
             if(providerAnnotation.required()){
                 TypeMirror type = getClassSafely(providerAnnotation::type).getTypeMirror();
                 for(Element enclosedElement : componentElement.getEnclosedElements()){
@@ -168,7 +168,7 @@ public class SymphoniaGeneratorProcessor extends AbstractProcessor {
     }
 
     private static boolean isInjectable(Element element){
-        return element.getKind() == ElementKind.FIELD && element.getAnnotation(Symphonia.Inject.class) != null;
+        return element.getKind() == ElementKind.FIELD && element.getAnnotation(Symphonia.DI.Inject.class) != null;
     }
 
     private static boolean hasNoArgConstructor(TypeElement typeElement) {
@@ -195,7 +195,7 @@ public class SymphoniaGeneratorProcessor extends AbstractProcessor {
     }
 
     private static String getComponentFieldName(TypeElement componentElement){
-        Symphonia.Component componentAnnotation = componentElement.getAnnotation(Symphonia.Component.class);
+        Symphonia.DI.Component componentAnnotation = componentElement.getAnnotation(Symphonia.DI.Component.class);
         if(componentAnnotation == null || componentAnnotation.name().isBlank()){
             return toCamelCase(componentElement.getSimpleName().toString());
         }else{
