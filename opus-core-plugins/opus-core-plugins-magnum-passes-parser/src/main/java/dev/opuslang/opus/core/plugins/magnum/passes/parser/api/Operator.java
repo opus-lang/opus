@@ -1,0 +1,31 @@
+package dev.opuslang.opus.core.plugins.magnum.passes.parser.api;
+
+public enum Operator {
+
+    BITWISE_AND,
+    BITWISE_OR,
+    BITWISE_XOR,
+    BITWISE_NOT,
+
+    WALRUS,
+    PLUSEQUALS,
+    MINUSEQUALS,
+    MULTIPLYEQUALS,
+    DIVIDEEQUALS,
+    INTEGERDIVIDEEQUALS,
+    POWEREQUALS,
+    PLUS,
+    MINUS,
+    MULTIPLY,
+    DIVIDE,
+    INTEGERDIVIDE,
+    POWER,
+
+    LOGIC_NOTEQUALS,
+    LOGIC_GREATEREQUALS,
+    LOGIC_LESSEQUALS,
+    LOGIC_GREATER,
+    LOGIC_LESS,
+    LOGIC_INVERT,
+
+}

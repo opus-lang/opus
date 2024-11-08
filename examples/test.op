@@ -1,0 +1,9 @@
+def utils: module := import("./utils.op");
+
+def const add: (int, int) -> void := \(a, b) -> ${ yield a + b; };
+def const foo: () -> void := \() -> ${
+    def a := 100;
+    while(a < 100) ${
+        a -= 1;
+    }
+};
