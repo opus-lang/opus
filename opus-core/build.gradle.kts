@@ -77,6 +77,8 @@ dependencies {
     opusPlugin(project(":opus-core-plugins:opus-core-plugins-magnum-passes-lexer"))
     opusPlugin(project(":opus-core-plugins:opus-core-plugins-magnum-passes-parser"))
     opusPlugin(project(":opus-core-plugins:opus-core-plugins-magnum-passes-astdump"))
+    opusPlugin(project(":opus-core-plugins:opus-core-plugins-magnum-passes-importcollector"))
+    opusPlugin(project(":opus-core-plugins:opus-core-plugins-magnum-passes-analyzer-importgraph"))
 }
 
 tasks.register("rebuildAndCopyOpusPlugins"){
