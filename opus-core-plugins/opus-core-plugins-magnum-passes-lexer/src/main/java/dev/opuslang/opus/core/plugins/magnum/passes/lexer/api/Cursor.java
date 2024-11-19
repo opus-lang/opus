@@ -5,6 +5,7 @@ public class Cursor {
     private static final int DEFAULT_LINE = 1;
     private static final int DEFAULT_COLUMN = 1;
 
+    // TODO: Migrate to long
     private int offset;
     private int line;
     private int column;

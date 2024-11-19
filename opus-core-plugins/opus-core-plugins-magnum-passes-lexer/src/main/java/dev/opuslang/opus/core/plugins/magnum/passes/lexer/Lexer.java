@@ -29,11 +29,24 @@ public class Lexer extends AbstractLexer {
 
             case '?' -> this.simple.simple(Token.Type.QUESTION);
 
-            case '&' -> this.simple.simple(Token.Type.OPERATOR_BITWISE_AND);
-            case '|' -> this.simple.simple(Token.Type.OPERATOR_BITWISE_OR);
+            case '&' -> {
+                if(this.scanner.peek(1) == '&'){
+                    yield this.simple.simple(2, Token.Type.LOGIC_AND);
+                }
+                yield this.simple.simple(Token.Type.OPERATOR_BITWISE_AND);
+            }
+            case '|' -> {
+                if(this.scanner.peek(1) == '|'){
+                    yield this.simple.simple(2, Token.Type.LOGIC_OR);
+                }
+                yield this.simple.simple(Token.Type.OPERATOR_BITWISE_OR);
+            }
             case '^' -> this.simple.simple(Token.Type.OPERATOR_BITWISE_XOR);
             case '~' -> {
                 if(this.scanner.peek(1) == '/'){
+                    if(this.scanner.peek(2) == '='){
+                        yield this.simple.simple(3, Token.Type.OPERATOR_INTEGERDIVIDEEQUALS);
+                    }
                     yield this.simple.simple(2, Token.Type.OPERATOR_INTEGERDIVIDE);
                 }
                 yield this.simple.simple(Token.Type.OPERATOR_BITWISE_NOT);
@@ -57,22 +70,44 @@ public class Lexer extends AbstractLexer {
                 yield this.simple.simple(Token.Type.BANG);
             }
 
+            case '=' -> {
+                if(this.scanner.peek(1) == '='){
+                    yield this.simple.simple(2, Token.Type.LOGIC_EQUALS);
+                }
+                throw new IllegalStateException(String.format("Unexpected character '%c' at '%d:%d'.", c, this.scanner.cursor().line(), this.scanner.cursor().column()));
+            }
+
             case '-' -> {
                 if(this.scanner.peek(1) == '>'){
                     yield this.simple.simple(2, Token.Type.ARROW);
                 }
+                if(this.scanner.peek(1) == '='){
+                    yield this.simple.simple(2, Token.Type.OPERATOR_MINUSEQUALS);
+                }
                 yield this.simple.simple(Token.Type.OPERATOR_MINUS);
             }
-            case '+' -> this.simple.simple(Token.Type.OPERATOR_PLUS);
+            case '+' -> {
+                if(this.scanner.peek(1) == '='){
+                    yield this.simple.simple(2, Token.Type.OPERATOR_PLUSEQUALS);
+                }
+                yield this.simple.simple(Token.Type.OPERATOR_PLUS);
+            }
             case '*' -> {
                 if(this.scanner.peek(1) == '*'){
+                    if(this.scanner.peek(2) == '='){
+                        yield this.simple.simple(3, Token.Type.OPERATOR_POWEREQUALS);
+                    }
                     yield this.simple.simple(2, Token.Type.OPERATOR_POWER);
+                }
+                if(this.scanner.peek(1) == '='){
+                    yield this.simple.simple(2, Token.Type.OPERATOR_MULTIPLYEQUALS);
                 }
                 yield this.simple.simple(Token.Type.OPERATOR_MULTIPLY);
             }
             case '/' -> switch (this.scanner.peek(1)){
                 case '/' -> this.comment.lexSingleline();
                 case '*' -> this.comment.lexMultiline();
+                case '=' -> this.simple.simple(2, Token.Type.OPERATOR_DIVIDEEQUALS);
                 default -> this.simple.simple(Token.Type.OPERATOR_DIVIDE);
             };
             case '>' -> {
