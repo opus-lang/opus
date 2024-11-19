@@ -6,6 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+// TODO: Scope inside "OpusAPI" class.
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.MODULE)
 public @interface Plugin {
