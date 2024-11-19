@@ -1,0 +1,14 @@
+def const add: fn(int, int) -> void := \(a, b) -> ${ yield a + b; };
+
+def const foo: fn() -> void := \() -> $f{
+    def a := 100;
+    while(a < 100) ${
+        a -= 1;
+    };
+    ;
+    loop ${
+        def x := 200;
+        yield $f #;
+    };
+    add(10, 20);
+};

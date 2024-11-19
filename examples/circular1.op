@@ -1,0 +1,1 @@
+def c2: module := import "./circular2.op";
