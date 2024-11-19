@@ -1,5 +1,6 @@
 package dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast;
 
+import dev.opuslang.opus.core.plugins.magnum.passes.parser.utils.Utils;
 import dev.opuslang.opus.symphonia.annotation.Symphonia;
 
 import java.util.Map;
@@ -8,23 +9,19 @@ import java.util.UUID;
 @Symphonia.Visitor.Visitable(order = Integer.MAX_VALUE)
 public non-sealed abstract class Node implements Visitable{
 
-    public record Id(String name, String uuid, String threadId, String suffix){
+    public record Id(String name, String id){
         public static Id generate(String name){
             return new Id(
                     name,
-                    UUID.randomUUID().toString(),
-                    Thread.currentThread().getName(),
-                    String.valueOf(Thread.currentThread().threadId())
+                    Utils.generateUniqueIdentifier()
             );
         }
 
         public String irIdentifier(){
             return String.format(
-                    "<Generated[%s]: %s|%s|%s>",
+                    "<Generated[%s]: %s>",
                     this.name,
-                    this.uuid,
-                    this.threadId,
-                    this.suffix
+                    this.id
             );
         }
     }
@@ -38,35 +35,20 @@ public non-sealed abstract class Node implements Visitable{
     }
 
     private final String _name;
-    private Id id;
-    private final Position position;
-    private final Annotation[] annotations;
+    private final Id id;
 
-    protected Node(Position position, Annotation[] annotations){
+    protected Node(){
         this._name = this.getClass().getSimpleName();
         this.id = Id.generate(this._name);
-        this.position = new Position(position); // copy
-        this.annotations = annotations;
     }
 
-    protected Node(Position position){
-        this(position, new Annotation[0]);
-    }
-
-    public final String _name() {
-        return this._name;
-    }
-
-    public final Id id() {
+    public final Id id(){
         return this.id;
     }
 
-    public final Position position(){
-        return this.position;
-    }
-
-    public final Annotation[] annotations() {
-        return this.annotations;
-    }
+    @Symphonia.Builder.Final
+    public abstract Position position();
+    @Symphonia.Builder.Final
+    public abstract Annotation[] annotations();
 
 }

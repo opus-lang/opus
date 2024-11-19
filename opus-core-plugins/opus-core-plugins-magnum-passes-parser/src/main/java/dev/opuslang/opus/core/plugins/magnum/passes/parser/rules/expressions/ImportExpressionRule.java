@@ -15,18 +15,23 @@ public class ImportExpressionRule extends TDOPNUDRule<ExpressionNode> {
 
     @Override
     public ImportExpressionNode nud() {
-        Node.Position position = new Node.Position(this.parser.currentPosition());
+        ImportExpressionNode.Builder nodeBuilder = new ImportExpressionNode.Builder(this.parser.copyCurrentPosition());
+
         this.parser
                 .nextIfType(Token.Type.KEYWORD_IMPORT)
                 .orElseThrow(() -> new IllegalStateException("Keyword 'import' was expected."));
 
-        String path = this.parser
-                .nextIfType(Token.Type.STRING)
-                .map(Token::value)
-                .orElseThrow(() -> new IllegalStateException("Import path was expected."));
+        nodeBuilder.path(
+                this.parser
+                    .nextIfType(Token.Type.STRING)
+                    .map(Token::value)
+                    .orElseThrow(() -> new IllegalStateException("Import path was expected."))
+        );
 
-        // TODO: allow various preprocessors (e.g., from C, Rust, etc.)
+        nodeBuilder.processor(ImportExpressionNode.OPUS_IMPORT_PROCESSOR);
 
-        return this.parser.createNode(ignore -> new ImportExpressionNode(position, path, ImportExpressionNode.OPUS_IMPORT_PROCESSOR));
+//        // TODO: allow various preprocessors (e.g., from C, Rust, etc.)
+
+        return nodeBuilder.build();
     }
 }

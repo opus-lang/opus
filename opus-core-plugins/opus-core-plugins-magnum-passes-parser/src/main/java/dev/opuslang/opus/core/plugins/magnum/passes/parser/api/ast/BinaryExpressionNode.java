@@ -4,28 +4,23 @@ import dev.opuslang.opus.core.plugins.magnum.passes.parser.api.Operator;
 import dev.opuslang.opus.symphonia.annotation.Symphonia;
 
 @Symphonia.Visitor.Visitable
-public final class BinaryExpressionNode extends ExpressionNode implements Visitable{
+@Symphonia.Builder.Buildable(BinaryExpressionNode.Builder.class)
+public abstract non-sealed class BinaryExpressionNode extends ExpressionNode implements Visitable{
 
-    private final ExpressionNode left;
-    private final Operator operator;
-    private final ExpressionNode right;
+    public abstract ExpressionNode left();
+    public abstract Operator operator();
+    public abstract ExpressionNode right();
 
-    public BinaryExpressionNode(Position position, ExpressionNode left, Operator operator, ExpressionNode right) {
-        super(position);
-        this.left = left;
-        this.operator = operator;
-        this.right = right;
+    @Override
+    public Annotation[] annotations() {
+        return new Annotation[0];
     }
 
-    public ExpressionNode left() {
-        return this.left;
+    public static final class Builder extends BinaryExpressionNode_Builder {
+
+        public Builder(Position position) {
+            super(position);
+        }
     }
 
-    public Operator operator() {
-        return this.operator;
-    }
-
-    public ExpressionNode right() {
-        return this.right;
-    }
 }

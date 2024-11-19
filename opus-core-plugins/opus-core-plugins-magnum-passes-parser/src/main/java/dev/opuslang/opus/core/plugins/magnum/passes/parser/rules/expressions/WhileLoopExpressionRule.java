@@ -5,11 +5,9 @@ import dev.opuslang.opus.core.plugins.magnum.passes.parser.api.Operator;
 import dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast.*;
 import dev.opuslang.opus.core.plugins.magnum.passes.parser.components.tdop.TDOPNUDRule;
 import dev.opuslang.opus.core.plugins.magnum.passes.parser.components.tdop.TDOPParserComponent;
-import dev.opuslang.opus.core.plugins.magnum.passes.parser.utils.Reference;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class WhileLoopExpressionRule extends TDOPNUDRule<ExpressionNode> {
 
@@ -22,7 +20,7 @@ public class WhileLoopExpressionRule extends TDOPNUDRule<ExpressionNode> {
 
     @Override
     public LoopExpressionNode nud() {
-        Node.Position position = new Node.Position(this.parser.currentPosition());
+        LoopExpressionNode.Builder nodeBuilder = new LoopExpressionNode.Builder(this.parser.copyCurrentPosition(), new Node.Annotation[0]);
 
         this.parser
                 .nextIfType(Token.Type.KEYWORD_WHILE)
@@ -39,37 +37,39 @@ public class WhileLoopExpressionRule extends TDOPNUDRule<ExpressionNode> {
                 .orElseThrow(() -> new IllegalStateException("Closing parenthesis for a conditional expression was expected."));
 
         BlockExpressionNode body = this.blockExpressionRule.nud();
-        List<StatementNode> modifiedStatementList = new ArrayList<>();
-        modifiedStatementList.add(
-                this.parser.createNode((ignore) -> new IgnoredExpressionStatementNode(
-                        position,
-                        this.parser.createNode((ignore1, annotations1) -> new ConditionalExpressionNode(
-                                position,
-                                annotations1,
-                                this.parser.createNode((ignore2) -> new UnaryExpressionNode(position, Operator.LOGIC_INVERT, condition)),
-                                this.parser.createNode((ignore3, annotations3) -> new BlockExpressionNode(
-                                        position,
-                                        annotations3,
-                                        new StatementNode[]{
-                                                this.parser.createNode((ignore4, annotations4) -> new YieldStatementNode(
-                                                        position,
-                                                        annotations4,
-                                                        body.label(),
-                                                        this.parser.createNode((ignore5, annotations5) -> new VoidExpressionNode(position, annotations5))
-                                                ))
-                                        })
-                                ), this.parser.createNode((ignore4, annotations4) -> new BlockExpressionNode(
-                                        position,
-                                        annotations4,
-                                        new StatementNode[]{}
-                                )))
-                        ))
-                )
+        List<StatementNode> modifiedStatementList = new ArrayList<>(List.of(body.statements()));
+        modifiedStatementList.addFirst(
+                new IgnoredExpressionStatementNode.Builder(nodeBuilder.position())
+                        .expression(
+                                new ConditionalExpressionNode.Builder(nodeBuilder.position())
+                                        .condition(
+                                                new UnaryExpressionNode.Builder(nodeBuilder.position())
+                                                        .operator(Operator.LOGIC_INVERT)
+                                                        .right(condition)
+                                                        .build()
+                                        )
+                                        .body(
+                                                new BlockExpressionNode.Builder(nodeBuilder.position())
+                                                        .statements(new StatementNode[]{
+                                                            new YieldStatementNode.Builder(nodeBuilder.position())
+                                                                    .defaultValue()
+                                                                    .label(body.label())
+                                                                    .build()
+                                                        })
+                                                        .generatedLabel()
+                                                        .build()
+                                        )
+                                        .defaultElseExpression()
+                                        .build()
+                        )
+                        .build()
         );
-        modifiedStatementList.addAll(List.of(body.statements()));
-        BlockExpressionNode modifiedBody = this.parser.createNode(ignore -> new BlockExpressionNode(body.position(), body.annotations(), modifiedStatementList.toArray(StatementNode[]::new)));
-        modifiedBody.setLabel(body.label());
+        nodeBuilder.body(
+                new BlockExpressionNode.Builder(body)
+                        .statements(modifiedStatementList.toArray(StatementNode[]::new))
+                        .build()
+        );
 
-        return this.parser.createNode((ignore, annotations) -> new LoopExpressionNode(position, annotations, modifiedBody));
+        return nodeBuilder.build();
     }
 }

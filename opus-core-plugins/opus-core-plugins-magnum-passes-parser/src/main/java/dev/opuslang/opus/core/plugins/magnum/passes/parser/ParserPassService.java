@@ -18,8 +18,8 @@ public class ParserPassService extends IndependentPassService<SourceFile> {
         TokenStream tokenStream = context.get("lex", TokenStream.class);
         Parser parser = new Parser(tokenStream);
         SourceFile parsedFile = parser.parse();
-        YieldRepairVisitor yieldRepairVisitor = new YieldRepairVisitor();
-        yieldRepairVisitor.visit(parsedFile);
+//        YieldRepairVisitor yieldRepairVisitor = new YieldRepairVisitor();
+//        yieldRepairVisitor.visit(parsedFile);
         return parsedFile;
     }
 }

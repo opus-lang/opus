@@ -7,9 +7,7 @@ import dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast.Node;
 import dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast.YieldStatementNode;
 import dev.opuslang.opus.symphonia.annotation.Symphonia;
 
-import java.util.Optional;
-
-@Symphonia.DI.Component
+@Symphonia.DI.Component(name = "yield")
 public class YieldStatementRule {
 
     @Symphonia.DI.Inject
@@ -19,30 +17,31 @@ public class YieldStatementRule {
     EndStatementRule end;
 
     public YieldStatementNode parse(){
-        Node.Position position = new Node.Position(this.parser.currentPosition());
+        YieldStatementNode.Builder nodeBuilder = new YieldStatementNode.Builder(this.parser.copyCurrentPosition(), new Node.Annotation[0]);
         this.parser.startAnnotationCapture();
 
         this.parser
                 .nextIfType(Token.Type.KEYWORD_YIELD)
                 .orElseThrow(() -> new IllegalStateException("Keyword 'yield' expected."));
 
-        String label = this.parser
-                .nextIfType(Token.Type.DOLLAR)
-                .map(ignore ->
-                    this.parser
-                            .nextIfType(Token.Type.IDENTIFIER)
-                            .orElseThrow(() -> new IllegalStateException("Label identifier expected."))
-                            .value()
-                ).orElse(null);
+        nodeBuilder.label(
+                this.parser
+                        .nextIfType(Token.Type.DOLLAR)
+                        .map(ignore ->
+                            this.parser
+                                    .nextIfType(Token.Type.IDENTIFIER)
+                                    .orElseThrow(() -> new IllegalStateException("Label identifier expected."))
+                                    .value()
+                        ).orElse(this.parser.labelsStack().peek())
+        );
 
         try{
             this.end.expect();
-            return this.parser.createNode((ignore, annotations) -> new YieldStatementNode(position, annotations, label, null /* TODO: FIX!!!! Optional.empty() */));
         }catch (Exception e){
-            ExpressionNode expression = this.parser.parseExpression();
+            nodeBuilder.value(this.parser.parseExpression());
             this.end.expect();
-            return this.parser.createNode((ignore, annotations) -> new YieldStatementNode(position, annotations, label, null/* TODO: FIX!!!!  Optional.of(expression) */));
         }
+        return nodeBuilder.build();
     }
 
 }

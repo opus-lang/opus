@@ -20,16 +20,20 @@ public class BlockExpressionRule extends TDOPNUDRule<ExpressionNode> {
 
     @Override
     public BlockExpressionNode nud() {
-        Node.Position position = new Node.Position(this.parser.currentPosition());
-        this.parser.startAnnotationCapture();
+        BlockExpressionNode.Builder nodeBuilder = new BlockExpressionNode.Builder(this.parser.copyCurrentPosition(), new Node.Annotation[0]);
 
         this.parser
                 .nextIfType(Token.Type.DOLLAR)
                 .orElseThrow(() -> new IllegalStateException("Block expression must always start with a '$'."));
 
-        Optional<String> label = this.parser
+        this.parser
                 .nextIfType(Token.Type.IDENTIFIER)
-                .map(Token::value);
+                .ifPresentOrElse(
+                        label -> nodeBuilder.label(label.value()),
+                        nodeBuilder::generatedLabel
+                );
+
+        this.parser.labelsStack().push(nodeBuilder.label());
 
         this.parser
                 .nextIfType(Token.Type.LCURLY)
@@ -41,7 +45,11 @@ public class BlockExpressionRule extends TDOPNUDRule<ExpressionNode> {
         }
         this.parser.consume();
 
-        return this.parser.createNode((ignore, annotations) -> new BlockExpressionNode(position, annotations, label, statements.toArray(StatementNode[]::new)));
+        nodeBuilder.statements(statements.toArray(StatementNode[]::new));
+
+        this.parser.labelsStack().pop();
+
+        return nodeBuilder.build();
     }
 
 }

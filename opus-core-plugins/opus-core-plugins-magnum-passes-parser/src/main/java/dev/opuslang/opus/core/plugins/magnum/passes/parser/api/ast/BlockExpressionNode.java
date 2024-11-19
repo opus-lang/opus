@@ -1,36 +1,36 @@
 package dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast;
 
+import dev.opuslang.opus.core.plugins.magnum.passes.parser.utils.Utils;
 import dev.opuslang.opus.symphonia.annotation.Symphonia;
 
 import java.util.Optional;
 
 @Symphonia.Visitor.Visitable
-public final class BlockExpressionNode extends ExpressionNode implements Visitable{
+@Symphonia.Builder.Buildable(BlockExpressionNode.Builder.class)
+public abstract non-sealed class BlockExpressionNode extends ExpressionNode implements Visitable{
 
-    private String label;
-    private final StatementNode[] statements;
+    public abstract String label();
+    public abstract StatementNode[] statements();
 
-    public BlockExpressionNode(Position position, Annotation[] annotations, StatementNode[] statements){
-        this(position, annotations, Optional.empty(), statements);
-    }
+    public static final class Builder extends BlockExpressionNode_Builder {
 
-    public BlockExpressionNode(Position position, Annotation[] annotations, Optional<String> label, StatementNode[] statements) {
-        super(position, annotations);
-        this.label = label.orElse(this.id().irIdentifier());
-        this.statements = statements;
-    }
+        public Builder(Position position, Annotation[] annotations) {
+            super(position, annotations);
+        }
 
-    public String label() {
-        return this.label;
-    }
-    public BlockExpressionNode setLabel(String label){
-        this.label = label;
-        return this;
+        public Builder(Position position){
+            this(position, new Annotation[0]);
+        }
 
-    }
+        public Builder(BlockExpressionNode other) {
+            super(other);
+        }
 
-    public StatementNode[] statements() {
-        return this.statements;
+        public Builder generatedLabel(){
+            this.label = Utils.generateUniqueIdentifier();
+            return this;
+        }
+
     }
 
 }

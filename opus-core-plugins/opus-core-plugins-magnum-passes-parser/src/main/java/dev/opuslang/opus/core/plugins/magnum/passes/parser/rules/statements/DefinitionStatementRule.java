@@ -6,7 +6,6 @@ import dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast.DefinitionSta
 import dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast.ExpressionNode;
 import dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast.InferTypeExpressionNode;
 import dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast.Node;
-import dev.opuslang.opus.core.plugins.magnum.passes.parser.utils.Reference;
 import dev.opuslang.opus.symphonia.annotation.Symphonia;
 
 import java.util.*;
@@ -21,38 +20,46 @@ public class DefinitionStatementRule {
     EndStatementRule end;
 
     public DefinitionStatementNode parse(){
-        Node.Position position = this.parser.currentPosition();
+        DefinitionStatementNode.Builder nodeBuilder = new DefinitionStatementNode.Builder(this.parser.copyCurrentPosition(), new Node.Annotation[0]);
+
         this.parser.startAnnotationCapture();
 
         this.parser
                 .nextIfType(Token.Type.KEYWORD_DEF)
                 .orElseThrow(() -> new IllegalStateException("Keyword 'def' expected."));
 
-        EnumSet<DefinitionStatementNode.Modifier> modifiers = EnumSet.noneOf(DefinitionStatementNode.Modifier.class);
+        nodeBuilder.modifiers(EnumSet.noneOf(DefinitionStatementNode.Modifier.class));
         this.parser
                 .nextIfType(Token.Type.KEYWORD_CONST)
-                .ifPresent((ignore) -> modifiers.add(DefinitionStatementNode.Modifier.CONST));
+                .ifPresent((ignore) -> nodeBuilder.modifiers().add(DefinitionStatementNode.Modifier.CONST));
         this.parser
                 .nextIfType(Token.Type.KEYWORD_MUT)
-                .ifPresent((ignore) -> modifiers.add(DefinitionStatementNode.Modifier.MUTABLE));
+                .ifPresent((ignore) -> nodeBuilder.modifiers().add(DefinitionStatementNode.Modifier.MUTABLE));
 
-        String name = this.parser
+        nodeBuilder.name(this.parser
                 .nextIfType(Token.Type.IDENTIFIER)
                 .orElseThrow(
                         () -> new IllegalStateException("Variable identifier expected.")
-                ).value();
+                ).value()
+        );
 
-        ExpressionNode type = this.parser
-                .nextIfType(Token.Type.COLON)
-                .map(ignore -> this.parser.parseExpression())
-                .orElse(this.parser.createNode(InferTypeExpressionNode::new));
+        nodeBuilder.type(
+                this.parser
+                        .nextIfType(Token.Type.COLON)
+                        .map(ignore -> this.parser.parseExpression())
+                        .orElse(new InferTypeExpressionNode.Builder(this.parser.copyCurrentPosition()).build())
+        );
 
-        Optional<ExpressionNode> assignedValue = this.parser
-                .nextIfType(Token.Type.OPERATOR_WALRUS)
-                .map(ignore -> this.parser.parseExpression());
+        nodeBuilder.assignedValue(
+                this.parser
+                        .nextIfType(Token.Type.OPERATOR_WALRUS)
+                        .map(ignore -> this.parser.parseExpression())
+                        .orElse(null)
+        );
+
         this.end.expect();
 
-        return this.parser.createNode((ignore, annotations) -> new DefinitionStatementNode(position, annotations, modifiers, name, type, assignedValue));
+        return nodeBuilder.build();
     }
 
 }

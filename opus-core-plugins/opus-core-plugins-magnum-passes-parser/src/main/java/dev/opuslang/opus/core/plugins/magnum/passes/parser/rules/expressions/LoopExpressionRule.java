@@ -19,15 +19,16 @@ public class LoopExpressionRule extends TDOPNUDRule<ExpressionNode> {
 
     @Override
     public LoopExpressionNode nud() {
-        Node.Position position = new Node.Position(this.parser.currentPosition());
+        LoopExpressionNode.Builder nodeBuilder = new LoopExpressionNode.Builder(this.parser.copyCurrentPosition(), new Node.Annotation[0]);
+
         this.parser.startAnnotationCapture();
 
         this.parser
                 .nextIfType(Token.Type.KEYWORD_LOOP)
                 .orElseThrow(() -> new IllegalStateException("Keyword 'loop' expected."));
 
-        BlockExpressionNode body = this.blockExpressionRule.nud();
+        nodeBuilder.body(this.blockExpressionRule.nud());
 
-        return this.parser.createNode((ignore, annotations) -> new LoopExpressionNode(position, annotations, body));
+        return nodeBuilder.build();
     }
 }

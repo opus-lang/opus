@@ -15,9 +15,9 @@ public abstract class TDOPParserComponent<T> extends ParserComponent<T> {
         super(parser);
     }
 
-    public void setRules(Map<Token.Type, TDOPNUDRule<T>> nudRules, Map<Token.Type, TDOPLEDRule<T>> ledRules){
-        this.nudRules = nudRules;
+    public void setRules(Map<Token.Type, TDOPLEDRule<T>> ledRules, Map<Token.Type, TDOPNUDRule<T>> nudRules){
         this.ledRules = ledRules;
+        this.nudRules = nudRules;
     }
 
     @Override
@@ -35,7 +35,7 @@ public abstract class TDOPParserComponent<T> extends ParserComponent<T> {
     }
 
     private T nud(Token token){
-        System.out.println("NUD: " + token.type());
+//        System.out.println("NUD: " + token.type());
         TDOPNUDRule<T> parselet = this.nudRules.get(token.type());
         if(parselet == null){
             throw new IllegalArgumentException(token.type() + " cannot be used in a prefix position.");
@@ -44,7 +44,7 @@ public abstract class TDOPParserComponent<T> extends ParserComponent<T> {
     }
 
     private T led(T left, Token token){
-        System.out.println("LED: " + token.type());
+//        System.out.println("LED: " + token.type());
         TDOPLEDRule<T> parselet = this.ledRules.get(token.type());
         if(parselet == null){
             throw new IllegalArgumentException(token.type() + " cannot be used in a in/postfix position.");

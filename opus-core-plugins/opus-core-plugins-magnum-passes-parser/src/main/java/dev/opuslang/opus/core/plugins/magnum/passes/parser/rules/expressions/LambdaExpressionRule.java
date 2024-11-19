@@ -9,6 +9,7 @@ import dev.opuslang.opus.core.plugins.magnum.passes.parser.components.tdop.TDOPN
 import dev.opuslang.opus.core.plugins.magnum.passes.parser.components.tdop.TDOPParserComponent;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 
 public class LambdaExpressionRule extends TDOPNUDRule<ExpressionNode> {
@@ -22,7 +23,8 @@ public class LambdaExpressionRule extends TDOPNUDRule<ExpressionNode> {
 
     @Override
     public LambdaExpressionNode nud() {
-        Node.Position position = new Node.Position(this.parser.currentPosition());
+        LambdaExpressionNode.Builder nodeBuilder = new LambdaExpressionNode.Builder(this.parser.copyCurrentPosition(), new Node.Annotation[0]);
+
         this.parser.startAnnotationCapture();
 
         this.parser
@@ -49,19 +51,21 @@ public class LambdaExpressionRule extends TDOPNUDRule<ExpressionNode> {
                                             .value()
                                     );
                                 }while(this.parser.nextIfType(Token.Type.COMMA).isPresent());
-                                this.parser
-                                        .nextIfType(Token.Type.RPARENTHESIS)
-                                        .orElseThrow(() -> new IllegalStateException("Argument list closing parenthesis expected."));
                             }
+                            this.parser
+                                    .nextIfType(Token.Type.RPARENTHESIS)
+                                    .orElseThrow(() -> new IllegalStateException("Argument list closing parenthesis expected."));
                         }
                 );
+
+        nodeBuilder.argumentNames(argumentNames.toArray(String[]::new));
 
         this.parser
                 .nextIfType(Token.Type.ARROW)
                 .orElseThrow(() -> new IllegalStateException("'->' expected."));
 
-        BlockExpressionNode body = this.blockExpressionRule.nud(); // Consider allowing block-less functions.
+        nodeBuilder.body(this.blockExpressionRule.nud()); // TODO: Consider allowing block-less functions.
 
-        return this.parser.createNode((ignore, annotations) -> new LambdaExpressionNode(position, annotations, argumentNames.toArray(String[]::new), body));
+        return nodeBuilder.build();
     }
 }

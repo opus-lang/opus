@@ -3,16 +3,10 @@ package dev.opuslang.opus.core.plugins.magnum.passes.parser;
 import dev.opuslang.opus.core.plugins.magnum.passes.lexer.api.Cursor;
 import dev.opuslang.opus.core.plugins.magnum.passes.lexer.api.Token;
 import dev.opuslang.opus.core.plugins.magnum.passes.lexer.api.TokenStream;
-import dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast.ExpressionNode;
-import dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast.Node;
-import dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast.SourceFile;
-import dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast.StatementNode;
+import dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast.*;
 import dev.opuslang.opus.core.plugins.magnum.passes.parser.components.ParserComponent;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Stack;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -20,14 +14,16 @@ import java.util.function.Predicate;
 public class Parser {
 
     private final TokenStream tokenStream;
-    private final Stack<List<Node.Annotation>> annotationsStack;
+    private final Deque<List<Node.Annotation>> annotationsStack;
+    private final Deque<String> labelsStack;
     private final ParserComponent<StatementNode> statementParserComponent;
     private final ParserComponent<ExpressionNode> expressionParserComponent;
     private final ParserComponent<Node.Annotation> annotationParserComponent;
 
     public Parser(TokenStream tokenStream) {
         this.tokenStream = tokenStream;
-        this.annotationsStack = new Stack<>();
+        this.annotationsStack = new ArrayDeque<>();
+        this.labelsStack = new ArrayDeque<>();
         this.statementParserComponent = new StatementParserComponent(this);
         this.expressionParserComponent = new ExpressionParserComponent(this);
         this.annotationParserComponent = new AnnotationsParserComponent(this);
@@ -39,8 +35,9 @@ public class Parser {
             try {
                 statements.add(this.parseStatement());
             }catch(Exception e){
-                System.err.println("Error at: " + this.currentPosition());
+                System.err.println("Error at: " + this.copyCurrentPosition());
                 e.printStackTrace();
+                break;
             }
         }
         return new SourceFile(statements.toArray(StatementNode[]::new));
@@ -54,14 +51,18 @@ public class Parser {
         return this.expressionParserComponent.parse();
     }
 
-    public final <T extends Node> T createNode(Function<Node.Position, T> nodeCreator){
-        return nodeCreator.apply(this.currentPosition());
+    public final Deque<String> labelsStack(){
+        return this.labelsStack;
     }
-    public final <T extends Node> T createNode(BiFunction<Node.Position, Node.Annotation[], T> nodeCreator){
-        // TODO: fix annotations (see #next)
-//        return nodeCreator.apply(this.currentPosition(), this.annotationsStack.pop().toArray(Node.Annotation[]::new));
-        return nodeCreator.apply(this.currentPosition(), new Node.Annotation[0]);
-    }
+
+//    public final <T extends Node> T createNode(Function<Node.Position, T> nodeCreator){
+//        return nodeCreator.apply(this.copyCurrentPosition());
+//    }
+//    public final <T extends Node> T createNode(BiFunction<Node.Position, Node.Annotation[], T> nodeCreator){
+//        // TODO: fix annotations (see #next)
+////        return nodeCreator.apply(this.currentPosition(), this.annotationsStack.pop().toArray(Node.Annotation[]::new));
+//        return nodeCreator.apply(this.copyCurrentPosition(), new Node.Annotation[0]);
+//    }
 
     public final void startAnnotationCapture(){
         this.annotationsStack.push(new ArrayList<>());
@@ -83,7 +84,7 @@ public class Parser {
     }
 
     public Optional<Token> nextIf(Predicate<Token> condition) {
-        return Optional.ofNullable(condition.test(this.tokenStream.peek()) ? this.tokenStream.next() : null);
+        return Optional.ofNullable(condition.test(this.peek()) ? this.next() : null);
     }
 
     public Optional<Token> nextIfType(Token.Type type){
@@ -99,10 +100,14 @@ public class Parser {
     }
 
     public Token peek(int offset){
-        return this.tokenStream.peek(offset);
+        Token token = this.tokenStream.peek(offset);
+
+        if(token.type() == Token.Type.COMMENT) return this.tokenStream.peek(offset+1);
+
+        return token;
     }
 
-    public Node.Position currentPosition(){
+    public Node.Position copyCurrentPosition(){
         Cursor cursor = this.tokenStream.peek().position();
         return new Node.Position(cursor.line(), cursor.column());
     }

@@ -21,14 +21,17 @@ public class BinaryExpressionRule extends TDOPLEDRule<ExpressionNode> {
 
     @Override
     public BinaryExpressionNode led(ExpressionNode left) {
-        Node.Position position = new Node.Position(this.parser.currentPosition());
+        BinaryExpressionNode.Builder nodeBuilder = new BinaryExpressionNode.Builder(this.parser.copyCurrentPosition())
+                .left(left)
+                .operator(operator);
+
         this.parser
                 .nextIfType(tokenOperator)
                 .orElseThrow(() -> new IllegalStateException("Operator " + tokenOperator.name() + " was expected."));
 
-        ExpressionNode right = this.parser.parseExpression();
+        nodeBuilder.right(this.parseWithAssociativity());
 
-        return this.parser.createNode(ignore -> new BinaryExpressionNode(position, left, this.operator, right));
+        return nodeBuilder.build();
     }
 
 }

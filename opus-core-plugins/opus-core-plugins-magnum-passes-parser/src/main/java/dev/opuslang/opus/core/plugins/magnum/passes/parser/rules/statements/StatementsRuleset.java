@@ -15,6 +15,7 @@ public class StatementsRuleset extends AbstractStatementsRuleset {
         return switch (token.type()){
             case SEMICOLON -> this.empty.parse();
             case KEYWORD_DEF -> this.definition.parse();
+            case KEYWORD_YIELD -> this.yield.parse();
             default -> this.ignoredExpressionOrAssignment.parse();
         };
     }
