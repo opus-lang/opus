@@ -17,7 +17,7 @@ public class CommentRule {
         Cursor position = new Cursor(this.scanner.cursor());
         this.scanner.next(1);
         int start = this.scanner.cursor().offset();
-        while(Characters.isLineEnd(this.scanner.peek())){
+        while(!Characters.isLineEnd(this.scanner.peek())){
             this.scanner.next();
         }
         return new Token(Token.Type.COMMENT, this.scanner.source().substring(start, this.scanner.cursor().offset()), position);

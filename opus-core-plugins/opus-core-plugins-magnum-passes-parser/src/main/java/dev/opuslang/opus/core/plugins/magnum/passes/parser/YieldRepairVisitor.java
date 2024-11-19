@@ -32,11 +32,6 @@ public class YieldRepairVisitor extends AbstractVisitor<Void> {
     }
 
     @Override
-    protected Void visit_VoidExpressionNode(VoidExpressionNode visitable) {
-        return super.visit_VoidExpressionNode(visitable);
-    }
-
-    @Override
     protected Void visit_BinaryExpressionNode(BinaryExpressionNode visitable) {
         this.visit(visitable.left());
         this.visit(visitable.right());
@@ -50,9 +45,10 @@ public class YieldRepairVisitor extends AbstractVisitor<Void> {
 
     @Override
     protected Void visit_YieldStatementNode(YieldStatementNode visitable) {
-        if(visitable.label() == null){
-            visitable.setLabel(scopeStack.peek().label());
-        }
+        // TODO: FIX!
+//        if(visitable.label() == null){
+//            visitable.setLabel(scopeStack.peek().label());
+//        }
         this.visit(visitable.value());
         return super.visit_YieldStatementNode(visitable);
     }
@@ -83,11 +79,6 @@ public class YieldRepairVisitor extends AbstractVisitor<Void> {
     }
 
     @Override
-    protected Void visit_NeverTypeExpressionNode(NeverTypeExpressionNode visitable) {
-        return super.visit_NeverTypeExpressionNode(visitable);
-    }
-
-    @Override
     protected Void visit_UnaryExpressionNode(UnaryExpressionNode visitable) {
         this.visit(visitable.right());
         return super.visit_UnaryExpressionNode(visitable);
@@ -102,7 +93,7 @@ public class YieldRepairVisitor extends AbstractVisitor<Void> {
     @Override
     protected Void visit_DefinitionStatementNode(DefinitionStatementNode visitable) {
         this.visit(visitable.type()); // could be skipped, since types must be known during compilation
-        visitable.assignedValue().ifPresent(this::visit);
+        if(visitable.assignedValue() != null) this.visit(visitable.assignedValue());
         return super.visit_DefinitionStatementNode(visitable);
     }
 

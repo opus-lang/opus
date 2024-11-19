@@ -4,6 +4,7 @@ import dev.opuslang.opus.core.plugins.magnum.passes.lexer.api.Cursor;
 
 public class SourceScanner {
 
+    // TODO: Migrate to lazy reading
     private final String source;
     private final Cursor cursor;
 

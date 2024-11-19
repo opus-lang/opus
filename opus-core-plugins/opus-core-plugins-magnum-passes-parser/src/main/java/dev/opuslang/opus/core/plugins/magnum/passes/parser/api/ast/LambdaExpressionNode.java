@@ -3,23 +3,17 @@ package dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast;
 import dev.opuslang.opus.symphonia.annotation.Symphonia;
 
 @Symphonia.Visitor.Visitable
-public final class LambdaExpressionNode extends ExpressionNode implements Visitable{
+@Symphonia.Builder.Buildable(LambdaExpressionNode.Builder.class)
+public abstract non-sealed class LambdaExpressionNode extends ExpressionNode implements Visitable{
 
-    private final String[] argumentNames;
-    private final BlockExpressionNode body;
+    public abstract String[] argumentNames();
+    public abstract BlockExpressionNode body();
 
-    public LambdaExpressionNode(Position position, Annotation[] annotations, String[] argumentNames, BlockExpressionNode body) {
-        super(position, annotations);
-        this.argumentNames = argumentNames;
-        this.body = body;
-    }
+    public static final class Builder extends LambdaExpressionNode_Builder{
 
-    public String[] argumentNames() {
-        return this.argumentNames;
-    }
-
-    public BlockExpressionNode body() {
-        return this.body;
+        public Builder(Position position, Annotation[] annotations) {
+            super(position, annotations);
+        }
     }
 
 }

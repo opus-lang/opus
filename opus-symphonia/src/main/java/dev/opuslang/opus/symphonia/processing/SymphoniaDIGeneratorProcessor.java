@@ -3,6 +3,7 @@ package dev.opuslang.opus.symphonia.processing;
 import com.google.auto.service.AutoService;
 import com.palantir.javapoet.*;
 import dev.opuslang.opus.symphonia.annotation.Symphonia;
+import dev.opuslang.opus.symphonia.utils.SymphoniaUtils;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -90,7 +91,7 @@ public class SymphoniaDIGeneratorProcessor extends AbstractProcessor {
                 .addModifiers(Modifier.PROTECTED);
 
         for (Symphonia.DI.Provider providerAnnotation : symphoniaPackageAnnotation.additionalProviders()) {
-            TypeMirror type = getClassSafely(providerAnnotation::type).getTypeMirror();
+            TypeMirror type = SymphoniaUtils.getClassSafely(providerAnnotation::type).getTypeMirror();
             setterClassBuilder.addField(TypeName.get(type), providerAnnotation.name(), Modifier.PROTECTED, Modifier.FINAL);
             setterConstructorBuilder.addStatement("this.$L = $L", providerAnnotation.name(), providerAnnotation.name());
             setterConstructorBuilder.addParameter(TypeName.get(type), providerAnnotation.name());
@@ -147,7 +148,7 @@ public class SymphoniaDIGeneratorProcessor extends AbstractProcessor {
 
     private Optional<String> findMatchingField(Symphonia.DI.Package symphoniaPackageAnnotation, TypeMirror fieldType) {
         for (Symphonia.DI.Provider providerAnnotation : symphoniaPackageAnnotation.additionalProviders()) {
-            return this.typeUtils.isSameType(fieldType, getClassSafely(providerAnnotation::type).getTypeMirror()) ? Optional.of(providerAnnotation.name()) : Optional.empty();
+            return this.typeUtils.isSameType(fieldType, SymphoniaUtils.getClassSafely(providerAnnotation::type).getTypeMirror()) ? Optional.of(providerAnnotation.name()) : Optional.empty();
         }
         return Optional.empty();
     }
@@ -155,7 +156,7 @@ public class SymphoniaDIGeneratorProcessor extends AbstractProcessor {
     private Optional<TypeMirror> checkRequiredBindings(Symphonia.DI.Package symphoniaPackageAnnotation, TypeElement componentElement) {
         providerLoop: for(Symphonia.DI.Provider providerAnnotation : symphoniaPackageAnnotation.additionalProviders()){
             if(providerAnnotation.required()){
-                TypeMirror type = getClassSafely(providerAnnotation::type).getTypeMirror();
+                TypeMirror type = SymphoniaUtils.getClassSafely(providerAnnotation::type).getTypeMirror();
                 for(Element enclosedElement : componentElement.getEnclosedElements()){
                     if(isInjectable(enclosedElement) && this.typeUtils.isSameType(type, enclosedElement.asType())){
                             continue providerLoop;
@@ -181,17 +182,6 @@ public class SymphoniaDIGeneratorProcessor extends AbstractProcessor {
             }
         }
         return false;
-    }
-
-    private static MirroredTypeException getClassSafely(Supplier<Class<?>> classSupplier) {
-        try {
-            classSupplier.get();
-            assert false; // must never happen
-        } catch (MirroredTypeException e) {
-            return e;
-        }
-        assert false; // must never happen
-        return new MirroredTypeException(null);
     }
 
     private static String getComponentFieldName(TypeElement componentElement){

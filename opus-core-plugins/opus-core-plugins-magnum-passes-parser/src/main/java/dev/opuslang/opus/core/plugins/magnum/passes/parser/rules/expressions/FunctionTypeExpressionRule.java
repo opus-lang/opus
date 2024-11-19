@@ -18,7 +18,7 @@ public class FunctionTypeExpressionRule extends TDOPNUDRule<ExpressionNode> {
 
     @Override
     public FunctionTypeExpressionNode nud() {
-        Node.Position position = new Node.Position(this.parser.currentPosition());
+        FunctionTypeExpressionNode.Builder nodeBuilder = new FunctionTypeExpressionNode.Builder(this.parser.copyCurrentPosition(), new Node.Annotation[0]);
         this.parser.startAnnotationCapture();
 
         this.parser
@@ -34,17 +34,19 @@ public class FunctionTypeExpressionRule extends TDOPNUDRule<ExpressionNode> {
             do{
                 argumentTypes.add(this.parser.parseExpression());
             }while(this.parser.nextIfType(Token.Type.COMMA).isPresent());
-            this.parser
-                    .nextIfType(Token.Type.RPARENTHESIS)
-                    .orElseThrow(() -> new IllegalStateException("Argument list closing parenthesis expected."));
         }
+        this.parser
+                .nextIfType(Token.Type.RPARENTHESIS)
+                .orElseThrow(() -> new IllegalStateException("Argument list closing parenthesis expected."));
+
+        nodeBuilder.argumentTypes(argumentTypes.toArray(ExpressionNode[]::new));
 
         this.parser
                 .nextIfType(Token.Type.ARROW)
                 .orElseThrow(() -> new IllegalStateException("'->' expected."));
 
-        ExpressionNode returnType = this.parser.parseExpression();
+        nodeBuilder.returnType(this.parser.parseExpression());
 
-        return this.parser.createNode((ignore, annotations) -> new FunctionTypeExpressionNode(position, annotations, argumentTypes.toArray(ExpressionNode[]::new), returnType));
+        return nodeBuilder.build();
     }
 }

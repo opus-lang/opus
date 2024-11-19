@@ -5,28 +5,26 @@ import dev.opuslang.opus.symphonia.annotation.Symphonia;
 import java.util.Optional;
 
 @Symphonia.Visitor.Visitable
-public final class YieldStatementNode extends StatementNode implements Visitable{
+@Symphonia.Builder.Buildable(YieldStatementNode.Builder.class)
+public abstract non-sealed class YieldStatementNode extends StatementNode implements Visitable{
 
-    private String label;
-    private final ExpressionNode value;
+    @Symphonia.Builder.Optional
+    public abstract String label();
+    public abstract ExpressionNode value();
 
-    public YieldStatementNode(Position position, Annotation[] annotations, String label, ExpressionNode value) {
-        super(position, annotations);
-        this.label = label;
-        this.value = value;
-    }
+    public static final class Builder extends YieldStatementNode_Builder{
+        public Builder(Position position, Annotation[] annotations) {
+            super(position, annotations);
+        }
 
-    public String label() {
-        return this.label;
-    }
+        public Builder(Position position){
+            this(position, new Annotation[0]);
+        }
 
-    public YieldStatementNode setLabel(String label){
-        this.label = label;
-        return this;
-    }
-
-    public ExpressionNode value() {
-        return this.value;
+        public Builder defaultValue(){
+            this.value = LiteralExpressionNode.Builder.VOID(new LiteralExpressionNode.Builder(this.position, new Annotation[0])).build();
+            return this;
+        }
     }
 
 }

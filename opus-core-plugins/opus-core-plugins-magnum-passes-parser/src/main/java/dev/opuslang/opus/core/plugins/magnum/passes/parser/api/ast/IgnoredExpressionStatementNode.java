@@ -3,17 +3,21 @@ package dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast;
 import dev.opuslang.opus.symphonia.annotation.Symphonia;
 
 @Symphonia.Visitor.Visitable
-public final class IgnoredExpressionStatementNode extends StatementNode implements Visitable{
+@Symphonia.Builder.Buildable(IgnoredExpressionStatementNode.Builder.class)
+public abstract non-sealed class IgnoredExpressionStatementNode extends StatementNode implements Visitable{
 
-    private final ExpressionNode expression;
+    public abstract ExpressionNode expression();
 
-    public IgnoredExpressionStatementNode(Position position, ExpressionNode expression) {
-        super(position); // should not have annotations, because these should belong to expression itself.
-        this.expression = expression;
+    @Override
+    public Annotation[] annotations() {
+        return new Annotation[0];
     }
 
-    public ExpressionNode expression() {
-        return this.expression;
+    public static final class Builder extends IgnoredExpressionStatementNode_Builder {
+
+        public Builder(Position position) {
+            super(position);
+        }
     }
 
 }

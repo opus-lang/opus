@@ -1,0 +1,13 @@
+def foo: sometype;
+
+// Member access
+foo.bar;
+
+// Static member access
+foo::bar.baz::baza;
+
+// Member access and a call
+foo.bar();
+
+// Call
+foo();

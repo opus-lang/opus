@@ -7,29 +7,34 @@ import dev.opuslang.opus.symphonia.annotation.Symphonia;
 import java.util.Optional;
 
 @Symphonia.Visitor.Visitable
-public final class ConditionalExpressionNode extends ExpressionNode implements Visitable{
+@Symphonia.Builder.Buildable(ConditionalExpressionNode.Builder.class)
+public abstract non-sealed class ConditionalExpressionNode extends ExpressionNode implements Visitable{
 
-    private final ExpressionNode condition;
-    private final BlockExpressionNode body;
-    private final BlockExpressionNode elseExpression;
+    public abstract ExpressionNode condition();
+    public abstract BlockExpressionNode body();
+    public abstract BlockExpressionNode elseExpression();
 
-    public ConditionalExpressionNode(Position position, Annotation[] annotations, ExpressionNode condition, BlockExpressionNode body, BlockExpressionNode elseExpression) {
-        super(position, annotations);
-        this.condition = condition;
-        this.body = body;
-        this.elseExpression = elseExpression;
-    }
+    public static final class Builder extends ConditionalExpressionNode_Builder{
 
-    public ExpressionNode condition() {
-        return this.condition;
-    }
+        public Builder(Position position, Annotation[] annotations) {
+            super(position, annotations);
+        }
 
-    public BlockExpressionNode body() {
-        return this.body;
-    }
+        public Builder(Position position){
+            this(position, new Annotation[0]);
+        }
 
-    public BlockExpressionNode elseExpression() {
-        return this.elseExpression;
+        public Builder defaultElseExpression(){
+            BlockExpressionNode.Builder bodyBuilder = new BlockExpressionNode.Builder(position).generatedLabel();
+            bodyBuilder.statements(new StatementNode[]{
+                    new YieldStatementNode.Builder(position)
+                            .label(bodyBuilder.label())
+                            .defaultValue()
+                            .build()
+            });
+            this.elseExpression = bodyBuilder.build();
+            return this;
+        }
     }
 
 }

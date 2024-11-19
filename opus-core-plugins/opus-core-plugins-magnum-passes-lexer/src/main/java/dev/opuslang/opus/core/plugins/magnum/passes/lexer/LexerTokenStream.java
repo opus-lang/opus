@@ -20,12 +20,6 @@ public class LexerTokenStream implements TokenStream {
     public Token next(){
         Token token = this.peek();
         this.consume();
-
-        // TODO: add comments and annotations
-        // Currently skipped as they cause a lot of problems.
-        // Reference solution: https://meri-stuff.blogspot.com/2012/09/tackling-comments-in-antlr-compiler.html
-        // Suggestion: store them in a Map, where Key is the ID of the node, and the value is the list of comments/annotations.
-//        if(token.type() == Token.Type.COMMENT) return this.advance();
         return token;
     }
 

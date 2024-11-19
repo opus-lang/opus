@@ -21,14 +21,15 @@ public class UnaryExpressionRule extends TDOPNUDRule<ExpressionNode> {
 
     @Override
     public UnaryExpressionNode nud() {
-        Node.Position position = new Node.Position(this.parser.currentPosition());
+        UnaryExpressionNode.Builder nodeBuilder = new UnaryExpressionNode.Builder(this.parser.copyCurrentPosition())
+                .operator(this.operator);
 
         this.parser
                 .nextIfType(tokenOperator)
                 .orElseThrow(() -> new IllegalStateException("Operator " + tokenOperator.name() + " was expected."));
 
-        ExpressionNode right = this.parser.parseExpression();
-        return this.parser.createNode(ignore -> new UnaryExpressionNode(position, operator, right));
+        nodeBuilder.right(this.parseWithAssociativity());
+        return nodeBuilder.build();
     }
 
 }

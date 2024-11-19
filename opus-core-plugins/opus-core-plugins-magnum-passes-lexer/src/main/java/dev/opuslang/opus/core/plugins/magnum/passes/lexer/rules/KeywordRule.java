@@ -36,8 +36,7 @@ public class KeywordRule {
             case "if" -> Token.Type.KEYWORD_IF;
             case "else" -> Token.Type.KEYWORD_ELSE;
             case "null" -> Token.Type.KEYWORD_NULL;
-            case "true" -> Token.Type.KEYWORD_TRUE;
-            case "false" -> Token.Type.KEYWORD_FALSE;
+            case "true", "false" -> Token.Type.BOOLEAN;
             case "type" -> Token.Type.KEYWORD_TYPE;
             case "distinct" -> Token.Type.KEYWORD_DISTINCT;
             case "ext" -> Token.Type.KEYWORD_EXT;
@@ -46,7 +45,6 @@ public class KeywordRule {
             case "struct" -> Token.Type.KEYWORD_STRUCT;
             case "unsafe" -> Token.Type.KEYWORD_UNSAFE;
             case "never" -> Token.Type.KEYWORD_NEVER;
-            case "infer" -> Token.Type.KEYWORD_INFER;
             default -> null;
         });
     }

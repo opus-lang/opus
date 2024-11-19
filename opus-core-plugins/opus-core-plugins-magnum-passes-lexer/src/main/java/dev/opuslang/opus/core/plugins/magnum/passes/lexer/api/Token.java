@@ -54,15 +54,12 @@ public record Token(Type type, String value, Cursor position) {
         KEYWORD_IF,
         KEYWORD_ELSE,
         KEYWORD_NULL,
-        KEYWORD_TRUE,
-        KEYWORD_FALSE,
         KEYWORD_DISTINCT,
         KEYWORD_EXT, // extension of types (extension methods attachment)
         KEYWORD_CLASS,
         KEYWORD_UNSEALED,
         KEYWORD_STRUCT,
         KEYWORD_UNSAFE,
-        KEYWORD_INFER,
 
         OPERATOR_BITWISE_AND,
         OPERATOR_BITWISE_OR,
@@ -84,16 +81,20 @@ public record Token(Type type, String value, Cursor position) {
         OPERATOR_INTEGERDIVIDE,
         OPERATOR_POWER,
 
+        LOGIC_EQUALS,
         LOGIC_NOTEQUALS,
         LOGIC_GREATEREQUALS,
         LOGIC_LESSEQUALS,
         LOGIC_GREATER,
         LOGIC_LESS,
+        LOGIC_AND,
+        LOGIC_OR,
 
         IDENTIFIER,
         STRING,
         CHARACTER,
         INTEGER,
+        BOOLEAN,
         FLOATING,
         VOID,
 

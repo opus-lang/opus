@@ -7,12 +7,4 @@ public non-sealed abstract class ExpressionNode extends Node implements Visitabl
 
     public interface Type{}
 
-    protected ExpressionNode(Position position, Annotation[] annotations) {
-        super(position, annotations);
-    }
-
-    protected ExpressionNode(Position position) {
-        super(position);
-    }
-
 }

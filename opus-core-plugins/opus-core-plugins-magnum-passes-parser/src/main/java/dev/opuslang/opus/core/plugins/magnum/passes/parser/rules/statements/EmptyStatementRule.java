@@ -15,10 +15,10 @@ public class EmptyStatementRule {
     EndStatementRule end;
 
     public EmptyStatementNode parse(){
-        Node.Position position = this.parser.currentPosition();
+        EmptyStatementNode.Builder nodeBuilder = new EmptyStatementNode.Builder(this.parser.copyCurrentPosition());
 
         this.end.expect();
-        return this.parser.createNode(ignore -> new EmptyStatementNode(position));
+        return nodeBuilder.build();
     }
 
 }

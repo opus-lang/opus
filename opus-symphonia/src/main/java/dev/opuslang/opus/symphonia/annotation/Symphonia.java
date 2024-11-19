@@ -55,4 +55,23 @@ public final class Symphonia {
         }
     }
 
+    public static final class Builder{
+        private Builder(){}
+
+        @Retention(RetentionPolicy.SOURCE)
+        @Target(ElementType.TYPE)
+        public @interface Buildable {
+            Class<?> value();
+        }
+
+        @Retention(RetentionPolicy.CLASS)
+        @Target(ElementType.METHOD)
+        public @interface Final{}
+
+        @Retention(RetentionPolicy.CLASS)
+        @Target(ElementType.METHOD)
+        public @interface Optional{}
+
+    }
+
 }
