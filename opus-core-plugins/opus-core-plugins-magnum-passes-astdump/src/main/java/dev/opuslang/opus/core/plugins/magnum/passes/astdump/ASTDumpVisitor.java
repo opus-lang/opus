@@ -4,44 +4,54 @@ import dev.opuslang.opus.core.plugins.magnum.passes.parser.api.ast.*;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Optional;
 
 public class ASTDumpVisitor extends AbstractVisitor<String> {
 
     private final String filename;
+    private int indentation;
 
     public ASTDumpVisitor(File file){
         this.filename = file.getName();
+        this.indentation = 0;
+    }
+
+    @Override
+    protected String visit_MemberCallExpressionNode(MemberCallExpressionNode visitable) {
+        return String.format("%s(%s)", this.visit(visitable.callable()), String.join(", ", Arrays.stream(visitable.arguments()).map(this::visit).toList()));
+    }
+
+    @Override
+    protected String visit_MemberAccessExpressionNode(MemberAccessExpressionNode visitable) {
+        return String.format("(%s%s%s)", this.visit(visitable.parent()), visitable.isStatic() ? "::" : ".", visitable.member());
     }
 
     @Override
     protected String visit_SourceFile(SourceFile visitable) {
         return String.format("""
                  /* AST Dump of '%s' */
-                 %s
-                 """,
+                 %s""",
                 filename,
                 String.join(System.lineSeparator(), Arrays.stream(visitable.statements()).map(this::visit).toList()));
     }
 
     @Override
     protected String visit_InferTypeExpressionNode(InferTypeExpressionNode visitable) {
-        return "infer";
+        return "<infer>";
     }
 
     @Override
     protected String visit_BlockExpressionNode(BlockExpressionNode visitable) {
-        return String.format("""
-                $ %s {
-                    %s
-                }
-                """,
+        this.indentation++;
+        String result = String.format("""
+                $%s {
+                %s
+                %s}""",
                 visitable.label(),
-                String.join(System.lineSeparator(), Arrays.stream(visitable.statements()).map(this::visit).toList()));
-    }
-
-    @Override
-    protected String visit_VoidExpressionNode(VoidExpressionNode visitable) {
-        return "#";
+                String.join(System.lineSeparator(), Arrays.stream(visitable.statements()).map((v) -> "\t".repeat(this.indentation) + this.visit(v)).toList()),
+                "\t".repeat(--this.indentation)
+        );
+        return result;
     }
 
     @Override
@@ -56,7 +66,7 @@ public class ASTDumpVisitor extends AbstractVisitor<String> {
 
     @Override
     protected String visit_YieldStatementNode(YieldStatementNode visitable) {
-        return String.format("yield %s %s;", visitable.label(), this.visit(visitable.value()));
+        return String.format("yield $%s %s;", visitable.label(), this.visit(visitable.value()));
     }
 
     @Override
@@ -77,11 +87,6 @@ public class ASTDumpVisitor extends AbstractVisitor<String> {
     }
 
     @Override
-    protected String visit_NeverTypeExpressionNode(NeverTypeExpressionNode visitable) {
-        return "<never>";
-    }
-
-    @Override
     protected String visit_UnaryExpressionNode(UnaryExpressionNode visitable) {
         return String.format("%s %s", visitable.operator().name(), this.visit(visitable.right()));
     }
@@ -97,7 +102,7 @@ public class ASTDumpVisitor extends AbstractVisitor<String> {
                 String.join(" ", visitable.modifiers().stream().map(Enum::name).toList()),
                 visitable.name(),
                 this.visit(visitable.type()),
-                visitable.assignedValue().map(v -> " := " + this.visit(visitable)).orElse("")
+                Optional.ofNullable(visitable.assignedValue()).map(v -> " := " + this.visit(v)).orElse("")
         );
     }
 
@@ -121,6 +126,23 @@ public class ASTDumpVisitor extends AbstractVisitor<String> {
                 this.visit(visitable.body()),
                 this.visit(visitable.elseExpression())
         );
+    }
+
+    @Override
+    protected String visit_ImportExpressionNode(ImportExpressionNode visitable) {
+        return String.format("import \"%s\" using \"%s\"", visitable.path(), visitable.processor());
+    }
+
+    @Override
+    protected String visit_LiteralExpressionNode(LiteralExpressionNode visitable) {
+        return switch (visitable.kind()){
+            case STRING -> "\""+visitable.value()+"\"";
+            case CHARACTER -> "'"+visitable.value()+"'";
+            case INTEGER, BOOLEAN -> visitable.value();
+            case FLOATING -> visitable.value()+"f";
+            case VOID -> "#";
+            case NEVER -> "<never>";
+        };
     }
 
     @Override
