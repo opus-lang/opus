@@ -77,11 +77,11 @@ To compile:
 1. In the root project directory, execute:
    - For Unix:
        ```shell
-       ./gradlew install
+       ./gradlew installDist
        ```
    - For Windows:
        ```
-       gradlew.bat install
+       gradlew.bat installDist
        ```
    This will create the `install` directory in the `opus-core/build/`.
 2. Copy the contents of the `install` directory into the desired location.
