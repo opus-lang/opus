@@ -27,7 +27,7 @@ in the implementation stage.
 - [x] Lexer
 - [x] Parser
 - [x] Desugaring
-- [ ] Import Resolution
+- [x] Import Resolution
 - [ ] Hindley-Milner Type Checker (currently only simple)
 - [ ] Linear-Type Constraint Checker
 - [ ] Intent Checker
